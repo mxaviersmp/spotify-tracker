@@ -1,0 +1,33 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+    -   id: double-quote-string-fixer
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: mixed-line-ending
+        args: ['--fix=lf']
+    -   id: check-added-large-files
+        args: ['--maxkb=25000']
+-   repo: https://github.com/humitos/mirrors-autoflake
+    rev: v1.3
+    hooks:
+    - id: autoflake
+      args: ['--in-place', '--remove-all-unused-imports', '--ignore-init-module-imports']
+-   repo: https://github.com/asottile/seed-isort-config
+    rev: v2.2.0
+    hooks:
+    - id: seed-isort-config
+-   repo: https://github.com/pre-commit/mirrors-isort
+    rev: v5.7.0
+    hooks:
+    - id: isort
+-   repo: https://gitlab.com/pycqa/flake8
+    rev: 3.8.4
+    hooks:
+    - id: flake8
+      additional_dependencies: [
+        'flake8-bugbear==21.3.2',
+        'flake8-docstrings==1.6.0',
+        'pep8-naming==0.11.1'
+      ]
