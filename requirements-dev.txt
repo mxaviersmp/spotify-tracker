@@ -7,3 +7,5 @@ pep8-naming
 flake8-bugbear
 flake8-docstrings
 pytest
+ipykernel
+psycopg

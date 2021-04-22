@@ -3,7 +3,12 @@
     "python.linting.flake8Enabled": true,
     "python.linting.enabled": true,
     "cSpell.words": [
+        "asyncio",
+        "dateutil",
         "getenv",
-        "spotify"
+        "speechiness",
+        "spotify",
+        "sptf",
+        "sqlite"
     ]
 }

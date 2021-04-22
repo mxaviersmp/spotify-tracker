@@ -1,8 +1,8 @@
 from setuptools import find_packages, setup
 
 setup(
-    name='utils',
-    version='1.0.0',
+    name='sptf',
+    version='0.1.0',
     python_requires='>=3.6',
     author='Matheus Xavier',
     description='Utility functions',
@@ -10,6 +10,7 @@ setup(
     install_requires=[
         'psutil',
         'requests',
-        'loguru'
+        'loguru',
+        'databases[postgresql]'
     ]
 )
