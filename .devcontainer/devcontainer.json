@@ -47,7 +47,8 @@
 		"coenraads.bracket-pair-colorizer",
 		"shardulm94.trailing-spaces",
 		"redhat.vscode-yaml",
-		"formulahendry.terminal"
+		"formulahendry.terminal",
+		"kevinrose.vsc-python-indent"
 	],
 
 	// Set variables that should apply to the entire container
