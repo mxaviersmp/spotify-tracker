@@ -3,7 +3,43 @@ import random
 
 import requests
 
+from sptf.utils.data import select_dict_keys
+
 B64_CLIENT = os.getenv('B64_CLIENT')
+REDIRECT_URI = os.getenv('REDIRECT_URI')
+OAUTH_TOKEN_URL = os.getenv('OAUTH_TOKEN_URL')
+
+
+def get_refresh_token(code):
+    """
+    Gets a new refresh token.
+
+    Parameters
+    ----------
+    code : str
+        user authorization code
+
+    Returns
+    -------
+    dict
+        user refresh and access tokens
+    """
+    payload = {
+        'code': code,
+        'grant_type': 'authorization_code',
+        'redirect_uri' : REDIRECT_URI
+    }
+    headers = {
+        'Authorization': f'Basic {B64_CLIENT}'
+    }
+    response = requests.post(
+        OAUTH_TOKEN_URL,
+        data=payload,
+        headers=headers,
+    )
+    tokens = response.json()
+    tokens = select_dict_keys(tokens, ['access_token', 'refresh_token'])
+    return tokens
 
 
 def get_access_token(refresh_token):
@@ -35,6 +71,28 @@ def get_access_token(refresh_token):
     )
     token = response.json()
     return token.get('access_token')
+
+
+def get_user_me(access_token):
+    """
+    Gets the user information.
+
+    Parameters
+    ----------
+    access_token : str
+        spotify user access token
+
+    Returns
+    -------
+    dict
+        user information
+    """
+    response = requests.get(
+        'https://api.spotify.com/v1/me',
+        headers={'Authorization': f'Bearer {access_token}'}
+    )
+    user = response.json()
+    return user
 
 
 def get_recently_played(access_token, after_timestamp, limit=50):

@@ -1,5 +1,4 @@
 -r requirements.txt
--e .
 pre-commit
 bump2version
 flake8
@@ -8,4 +7,4 @@ flake8-bugbear
 flake8-docstrings
 pytest
 ipykernel
-psycopg
+psycopg2

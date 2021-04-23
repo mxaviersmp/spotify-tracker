@@ -11,6 +11,6 @@ setup(
         'psutil',
         'requests',
         'loguru',
-        'databases[postgresql]'
+        'ormar[postgresql]'
     ]
 )

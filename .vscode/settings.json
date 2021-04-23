@@ -4,8 +4,11 @@
     "python.linting.enabled": true,
     "cSpell.words": [
         "asyncio",
+        "bcrypt",
         "dateutil",
         "getenv",
+        "noqa",
+        "ormar",
         "speechiness",
         "spotify",
         "sptf",
