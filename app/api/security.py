@@ -9,7 +9,7 @@ from fastapi.security.oauth2 import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-from api.models import TokenData, UserModel
+from app.api.models import TokenData, UserModel
 from app.database.schema import User
 
 CLIENT_ID = os.getenv('CLIENT_ID')
