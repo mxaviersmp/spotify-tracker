@@ -1,7 +1,8 @@
 import os
-from typing import Dict, List, Optional, Text, Tuple, Union
 
-from databases import Database
+import databases
+import ormar
+import sqlalchemy
 
 DB_CONNECTOR = os.getenv('DB_CONNECTOR')
 DB_USERNAME = os.getenv('DB_USERNAME')
@@ -11,209 +12,88 @@ DB_DATABASE = os.getenv('DB_DATABASE')
 
 DB_URL = f'{DB_CONNECTOR}://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}/{DB_DATABASE}'
 
-
-async def insert_table(
-    table: Text,
-    columns: Union[List[Text], Text],
-    values: Union[List[Dict], Dict]
-):
-    """
-    Inerts new value into the specified table.
-
-    Parameters
-    ----------
-    table : str
-        name of the table
-    columns : list of str
-        names of the columns to update
-    values : list of dict
-        list of values to insert
-    """
-    if not isinstance(columns, list):
-        columns = [columns]
-    if not isinstance(values, list):
-        values = [values]
-    async with Database(DB_URL) as database:
-        query = f'''INSERT INTO {table} \
-            ({', '.join(columns)}) \
-            VALUES ({', '.join([f':{column}' for column in columns])})'''
-        await database.execute_many(query=query, values=values)
+db = databases.Database(DB_URL)
+metadata = sqlalchemy.MetaData()
 
 
-async def update_table(
-    table: Text,
-    columns: Union[List[Text], Text],
-    key: Text,
-    values: Union[List[Dict], Dict]
-):
-    """
-    Updates values with key on table.
-
-    Parameters
-    ----------
-    table : str
-        name of the table
-    columns : list of str
-        names of the columns to update
-    key : str
-        name of the unique identifier
-    values : list of dict
-        list of values to insert
-    """
-    if not isinstance(columns, list):
-        columns = [columns]
-    if not isinstance(values, list):
-        values = [values]
-    query = f'''UPDATE {table} \
-        SET {', '.join([f'{column}=:{column}' for column in columns])} \
-        WHERE {f'{key}=:{key}'}'''
-    async with Database(DB_URL) as database:
-        await database.execute_many(query=query, values=values)
+class BaseMeta(ormar.ModelMeta):
+    metadata = metadata
+    database = db
 
 
-async def select_table(
-    table: Text,
-    columns: Union[List[Text], Text],
-    whereclauses: Optional[List[Tuple]] = None,
-):
-    """
-    Executes a select query.
+class User(ormar.Model):
+    class Meta(BaseMeta):
+        tablename = 'users'
 
-    Parameters
-    ----------
-    table : str
-        name of the table
-    columns : list of str
-        names of the columns to select
-    whereclauses: list of tuple
-        where clauses conditions
+    id = ormar.String(max_length=256, primary_key=True)
+    display_name = ormar.String(max_length=256)
+    href = ormar.String(max_length=256)
+    email = ormar.String(max_length=256)
+    country = ormar.String(max_length=256)
+    uri = ormar.String(max_length=256)
+    refresh_token = ormar.String(max_length=256)
+    hashed_password = ormar.String(max_length=256)
 
-    Returns
-    -------
-    list of dict
-        query result
-    """
-    async with Database(DB_URL) as database:
-        if not isinstance(columns, list):
-            columns = [columns]
-        query = f'''SELECT {', '.join(columns)} FROM {table}'''
-        if whereclauses:
-            query = f'''{query} WHERE \
-                {', '.join([f'{k}{c}{v}' for (k, c, v) in whereclauses])}'''
-        results = await database.fetch_all(
-            query=query
-        )
-        if results:
-            results = [*map(dict, results)]
-        return results
+
+class UserToken(ormar.Model):
+    class Meta(BaseMeta):
+        tablename = 'user_tokens'
+
+    id = ormar.Integer(primary_key=True, autoincrement=True)
+    user = ormar.ForeignKey(User)
+    access_token = ormar.String(max_length=256, nullable=True)
+
+
+class Track(ormar.Model):
+    class Meta(BaseMeta):
+        tablename = 'tracks'
+
+    id = ormar.String(max_length=256, primary_key=True)
+    name = ormar.String(max_length=256)
+    href = ormar.String(max_length=256)
+    popularity = ormar.Integer()
+    danceability = ormar.Float(nullable=True)
+    energy = ormar.Float(nullable=True)
+    loudness = ormar.Float(nullable=True)
+    speechiness = ormar.Float(nullable=True)
+    acousticness = ormar.Float(nullable=True)
+    instrumentalness = ormar.Float(nullable=True)
+    liveness = ormar.Float(nullable=True)
+    valence = ormar.Float(nullable=True)
+    tempo = ormar.Float(nullable=True)
+    key = ormar.Integer(nullable=True)
+    mode = ormar.Integer(nullable=True)
+    duration_ms = ormar.Integer(nullable=True)
+    time_signature = ormar.Integer(nullable=True)
+
+
+class Artist(ormar.Model):
+    class Meta(BaseMeta):
+        tablename = 'artists'
+
+    id = ormar.String(max_length=256, primary_key=True)
+    name = ormar.String(max_length=256)
+    href = ormar.String(max_length=256)
+    popularity = ormar.Integer(nullable=True)
+    genres = ormar.String(max_length=256, nullable=True)
+
+
+class PlayedTrack(ormar.Model):
+    class Meta(BaseMeta):
+        tablename = 'played_tracks'
+
+    id = ormar.Integer(primary_key=True, autoincrement=True)
+    user = ormar.ForeignKey(User)
+    track = ormar.ForeignKey(Track)
+    artist = ormar.ForeignKey(Artist)
+    played_at = ormar.DateTime()
 
 
 if __name__ == '__main__':
-    import sqlalchemy
-
-    metadata = sqlalchemy.MetaData(DB_URL)
-
-    users = sqlalchemy.Table(
-        'users',
-        metadata,
-        sqlalchemy.Column('id', sqlalchemy.String(), primary_key=True),
-        sqlalchemy.Column('display_name', sqlalchemy.String()),
-        sqlalchemy.Column('href', sqlalchemy.String()),
-        sqlalchemy.Column('email', sqlalchemy.String()),
-        sqlalchemy.Column('country', sqlalchemy.String()),
-        sqlalchemy.Column('product', sqlalchemy.String()),
-        sqlalchemy.Column('type', sqlalchemy.String()),
-        sqlalchemy.Column('uri', sqlalchemy.String()),
-        sqlalchemy.Column('refresh_token', sqlalchemy.String()),
-        sqlalchemy.Column('hashed_password', sqlalchemy.String()),
-    )
-
-    tracks = sqlalchemy.Table(
-        'tracks',
-        metadata,
-        sqlalchemy.Column('id', sqlalchemy.String(), primary_key=True),
-        sqlalchemy.Column('name', sqlalchemy.String()),
-        sqlalchemy.Column('href', sqlalchemy.String()),
-        sqlalchemy.Column('popularity', sqlalchemy.Integer()),
-        sqlalchemy.Column('danceability', sqlalchemy.Float()),
-        sqlalchemy.Column('energy', sqlalchemy.Float()),
-        sqlalchemy.Column('loudness', sqlalchemy.Float()),
-        sqlalchemy.Column('speechiness', sqlalchemy.Float()),
-        sqlalchemy.Column('acousticness', sqlalchemy.Float()),
-        sqlalchemy.Column('instrumentalness', sqlalchemy.Float()),
-        sqlalchemy.Column('liveness', sqlalchemy.Float()),
-        sqlalchemy.Column('valence', sqlalchemy.Float()),
-        sqlalchemy.Column('tempo', sqlalchemy.Float()),
-        sqlalchemy.Column('key', sqlalchemy.Integer()),
-        sqlalchemy.Column('mode', sqlalchemy.Integer()),
-        sqlalchemy.Column('duration_ms', sqlalchemy.Integer()),
-        sqlalchemy.Column('time_signature', sqlalchemy.Integer()),
-    )
-
-    artists = sqlalchemy.Table(
-        'artists',
-        metadata,
-        sqlalchemy.Column('id', sqlalchemy.String(), primary_key=True),
-        sqlalchemy.Column('name', sqlalchemy.String()),
-        sqlalchemy.Column('href', sqlalchemy.String()),
-        sqlalchemy.Column('popularity', sqlalchemy.Integer()),
-        sqlalchemy.Column('genres', sqlalchemy.String()),
-    )
-
-    played_tracks = sqlalchemy.Table(
-        'played_tracks',
-        metadata,
-        sqlalchemy.Column(
-            'id',
-            sqlalchemy.Integer(),
-            primary_key=True, autoincrement=True
-        ),
-        sqlalchemy.Column(
-            'user_id',
-            sqlalchemy.String(),
-            sqlalchemy.ForeignKey('users.id')
-        ),
-        sqlalchemy.Column(
-            'track_id',
-            sqlalchemy.String(),
-            sqlalchemy.ForeignKey('tracks.id')
-        ),
-        sqlalchemy.Column(
-            'artist_id',
-            sqlalchemy.String(),
-            sqlalchemy.ForeignKey('artists.id')
-        ),
-        sqlalchemy.Column(
-            'played_at',
-            sqlalchemy.DateTime(),
-        ),
-    )
-
-    user_token = sqlalchemy.Table(
-        'user_token',
-        metadata,
-        sqlalchemy.Column(
-            'id',
-            sqlalchemy.String(),
-            sqlalchemy.ForeignKey('users.id'),
-            primary_key=True
-        ),
-        sqlalchemy.Column(
-            'access_token',
-            sqlalchemy.String()
-        ),
-    )
-
-    played_tracks.drop()
-    # tracks.drop()
-    # artists.drop()
-    # user_token.drop()
-    # users.drop()
-
-    played_tracks.create()
-    # tracks.create()
-    # artists.create()
-    # user_token.create()
-    # users.create()
-
-    print(__file__)
+    # create the database
+    # note that in production you should use migrations
+    # note that this is not required if you connect to existing database
+    engine = sqlalchemy.create_engine(DB_URL)
+    # just to be sure we clear the db before
+    metadata.drop_all(engine)
+    metadata.create_all(engine)

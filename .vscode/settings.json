@@ -1,11 +1,14 @@
 {
-    "python.pythonPath": "/home/flycher/anaconda3/envs/fs/bin/python",
+    "python.pythonPath": "/usr/local/bin/python",
     "python.linting.flake8Enabled": true,
     "python.linting.enabled": true,
     "cSpell.words": [
         "asyncio",
+        "bcrypt",
         "dateutil",
         "getenv",
+        "noqa",
+        "ormar",
         "speechiness",
         "spotify",
         "sptf",
