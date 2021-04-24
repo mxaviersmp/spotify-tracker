@@ -63,7 +63,7 @@
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "pip3 --disable-pip-version-check --no-cache-dir install --user -r requirements-dev.txt",
+	"postCreateCommand": "pip3 --disable-pip-version-check --no-cache-dir install -r requirements-dev.txt",
 
 	// Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode"

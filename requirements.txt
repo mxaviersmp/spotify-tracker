@@ -1,4 +1,7 @@
--e .
+psutil
+requests
+loguru
+ormar[postgresql]
 fastapi
 uvicorn
 python-jose[cryptography]

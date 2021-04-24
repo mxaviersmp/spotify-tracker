@@ -1,10 +1,5 @@
 from typing import List
 
-from fastapi import Depends, FastAPI, Request, status
-from fastapi.exceptions import HTTPException
-from fastapi.responses import RedirectResponse
-from fastapi.security import OAuth2PasswordRequestForm
-
 from api.models import PlayedTrackModel, Token, UserModel, UserPassword, UserRefreshToken
 from api.security import (
     authenticate_user,
@@ -13,10 +8,15 @@ from api.security import (
     get_current_user,
     get_password_hash,
 )
+from fastapi import Depends, FastAPI, Request, status
+from fastapi.exceptions import HTTPException
+from fastapi.responses import RedirectResponse
+from fastapi.security import OAuth2PasswordRequestForm
+
 from app.database.schema import PlayedTrack, User, UserToken, db
 from app.etl.spotify_api import get_refresh_token, get_user_me
 
-app = FastAPI()
+app = FastAPI(title='Spotify Stats', version='0.1.0')
 
 
 @app.on_event('startup')
