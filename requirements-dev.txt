@@ -1,4 +1,4 @@
--r requirements.txt
+-e .
 pre-commit
 bump2version
 flake8

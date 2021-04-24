@@ -1,18 +1,24 @@
 from typing import List
 
-from api.models import PlayedTrackModel, Token, UserModel, UserPassword, UserRefreshToken
-from api.security import (
+from fastapi import Depends, FastAPI, Request, status
+from fastapi.exceptions import HTTPException
+from fastapi.responses import RedirectResponse
+from fastapi.security import OAuth2PasswordRequestForm
+
+from app.api.models import (
+    PlayedTrackModel,
+    Token,
+    UserModel,
+    UserPassword,
+    UserRefreshToken,
+)
+from app.api.security import (
     authenticate_user,
     authorize_spotify,
     create_access_token,
     get_current_user,
     get_password_hash,
 )
-from fastapi import Depends, FastAPI, Request, status
-from fastapi.exceptions import HTTPException
-from fastapi.responses import RedirectResponse
-from fastapi.security import OAuth2PasswordRequestForm
-
 from app.database.schema import PlayedTrack, User, UserToken, db
 from app.etl.spotify_api import get_refresh_token, get_user_me
 
@@ -31,7 +37,6 @@ async def shutdown():
 
 @app.get('/')
 async def root():
-    return await User.objects.all()
     return {'status': 'ok'}
 
 
