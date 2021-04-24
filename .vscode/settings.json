@@ -6,12 +6,19 @@
         "asyncio",
         "bcrypt",
         "dateutil",
+        "deque",
+        "expanduser",
         "getenv",
+        "getsizeof",
+        "itertools",
         "noqa",
         "ormar",
+        "pathlib",
+        "psutil",
+        "pydantic",
         "speechiness",
         "spotify",
-        "sptf",
-        "sqlite"
+        "sqlite",
+        "uvicorn"
     ]
 }

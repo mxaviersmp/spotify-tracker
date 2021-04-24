@@ -3,7 +3,7 @@ import random
 
 import requests
 
-from sptf.utils.data import select_dict_keys
+from app.utils.data import select_dict_keys
 
 B64_CLIENT = os.getenv('B64_CLIENT')
 REDIRECT_URI = os.getenv('REDIRECT_URI')

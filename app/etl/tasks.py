@@ -3,9 +3,14 @@ import datetime
 
 import dateutil.parser
 
-import sptf.spotify_api as api
-from sptf.spotify_db import Artist, PlayedTrack, Track, UserToken, db
-from sptf.utils.data import rename_dict_keys, select_dict_keys
+from app.database.schema import Artist, PlayedTrack, Track, UserToken, db
+from app.etl.spotify_api import (
+    get_access_token,
+    get_artists,
+    get_audio_features,
+    get_recently_played,
+)
+from app.utils.data import rename_dict_keys, select_dict_keys
 
 
 async def update_access_tokens():
@@ -13,7 +18,7 @@ async def update_access_tokens():
     async with db:
         tokens = await UserToken.objects.select_related('user').all()
         for token in tokens:
-            token.access_token = api.get_access_token(
+            token.access_token = get_access_token(
                 token.user.refresh_token
             )
         await UserToken.objects.bulk_update(tokens)
@@ -28,7 +33,7 @@ async def get_played_tracks():
         yesterday_unix_timestamp = int(yesterday.timestamp()) * 1000
         all_tracks = []
         for token in tokens:
-            user_tracks = api.get_recently_played(
+            user_tracks = get_recently_played(
                 token.access_token, after_timestamp=yesterday_unix_timestamp
             )
             for track in user_tracks:
@@ -110,7 +115,7 @@ async def get_track_info():
         access_tokens = await UserToken.objects.all()
         access_tokens = [token.access_token for token in access_tokens]
 
-        audio_features = api.get_audio_features(access_tokens, new_tracks_id)
+        audio_features = get_audio_features(access_tokens, new_tracks_id)
         columns = [
             'danceability',
             'energy',
@@ -148,7 +153,7 @@ async def get_artist_info():
         access_tokens = await UserToken.objects.all()
         access_tokens = [token.access_token for token in access_tokens]
 
-        artists_info = api.get_artists(access_tokens, new_artists_id)
+        artists_info = get_artists(access_tokens, new_artists_id)
         artists_info = select_dict_keys(artists_info, ['id', 'popularity', 'genres'])
         for artist in artists_info:
             artist['genres'] = ','.join(artist.get('genres'))

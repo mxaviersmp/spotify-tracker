@@ -5,7 +5,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
 
-from sptf.spotify_tasks import (
+from app.etl.tasks import (
     run_get_artist_info,
     run_get_played_tracks,
     run_get_track_info,

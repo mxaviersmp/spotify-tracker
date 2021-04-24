@@ -13,8 +13,8 @@ from api.security import (
     get_current_user,
     get_password_hash,
 )
-from sptf.spotify_api import get_refresh_token, get_user_me
-from sptf.spotify_db import PlayedTrack, User, UserToken, db
+from app.database.schema import PlayedTrack, User, UserToken, db
+from app.etl.spotify_api import get_refresh_token, get_user_me
 
 app = FastAPI()
 
@@ -31,6 +31,7 @@ async def shutdown():
 
 @app.get('/')
 async def root():
+    return await User.objects.all()
     return {'status': 'ok'}
 
 
