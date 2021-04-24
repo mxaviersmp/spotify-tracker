@@ -25,3 +25,4 @@ for dir in dags_dirs:
 ```
 - List dags: `$ airflow dags list`
 - Run dag: `$ airflow dags test spotify_etl 2015-06-01`
+- Server api: `$ uvicorn app.api.main:app`

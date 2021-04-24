@@ -18,7 +18,7 @@
         "pydantic",
         "speechiness",
         "spotify",
-        "sptf",
-        "sqlite"
+        "sqlite",
+        "uvicorn"
     ]
 }
