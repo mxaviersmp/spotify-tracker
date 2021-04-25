@@ -2,7 +2,6 @@
 
 A Spotify API to collect statistics from users played musics
 
-
 - Add environment variables: `$ set -a; . .env; set +a`
 - Init airflow db: `airflow db init`
 - Remove examples from dags: `$ sed -i 's/load_examples = True/load_examples = False/g' ~/airflow/airflow.cfg`
@@ -30,3 +29,4 @@ for dir in dags_dirs:
 - Server api: `$ uvicorn app.api.main:app`
 
 ![db erd diagram](./spotify-stats-erd.png)
+![etl diagram](./spotify-stats-etl.png)

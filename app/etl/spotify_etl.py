@@ -1,3 +1,4 @@
+import asyncio
 import os
 from datetime import timedelta
 
@@ -6,11 +7,32 @@ from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
 
 from app.etl.tasks import (
-    run_get_artist_info,
-    run_get_played_tracks,
-    run_get_track_info,
-    run_update_access_tokens,
+    get_artist_info,
+    get_played_tracks,
+    get_track_info,
+    update_access_tokens,
 )
+
+
+def run_update_access_tokens():
+    """Run update_access_tokens."""
+    asyncio.run(update_access_tokens())
+
+
+def run_get_played_tracks():
+    """Run get_played_tracks."""
+    asyncio.run(get_played_tracks())
+
+
+def run_get_track_info():
+    """Run get_track_info."""
+    asyncio.run(get_track_info())
+
+
+def run_get_artist_info():
+    """Run get_artist_info."""
+    asyncio.run(get_artist_info())
+
 
 default_args = {
     'owner': 'airflow',

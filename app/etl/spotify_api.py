@@ -1,16 +1,18 @@
 import os
 import random
+from typing import Dict, List, Optional, Text
 
 import requests
 
 from app.utils.data import select_dict_keys
+from app.utils.logger import logger
 
 B64_CLIENT = os.getenv('B64_CLIENT')
 REDIRECT_URI = os.getenv('REDIRECT_URI')
 OAUTH_TOKEN_URL = os.getenv('OAUTH_TOKEN_URL')
 
 
-def get_refresh_token(code):
+def get_refresh_token(code: Text) -> Dict[str, str]:
     """
     Gets a new refresh token.
 
@@ -42,7 +44,7 @@ def get_refresh_token(code):
     return tokens
 
 
-def get_access_token(refresh_token):
+def get_access_token(refresh_token: Text) -> Text:
     """
     Gets a new access token using the refresh token.
 
@@ -73,7 +75,7 @@ def get_access_token(refresh_token):
     return token.get('access_token')
 
 
-def get_user_me(access_token):
+def get_user_me(access_token: Text) -> Dict:
     """
     Gets the user information.
 
@@ -95,7 +97,9 @@ def get_user_me(access_token):
     return user
 
 
-def get_recently_played(access_token, after_timestamp, limit=50):
+def get_recently_played(
+    access_token: Text, after_timestamp: Text, limit: Optional[int] = 50
+) -> List[Dict]:
     """
     Gets the user most recently played music since `after_timestamp`.
 
@@ -113,6 +117,9 @@ def get_recently_played(access_token, after_timestamp, limit=50):
     list of dict
         list with the users tracks
     """
+    if not (0 < limit <= 50):
+        limit = 50
+        logger.warning(f'limit must be at most {limit}. setting value to {limit}')
     tracks = []
     url = 'https://api.spotify.com/v1/me/player/recently-played?limit={}&after={}'.format(
         limit, after_timestamp
@@ -129,7 +136,9 @@ def get_recently_played(access_token, after_timestamp, limit=50):
     return tracks
 
 
-def get_audio_features(access_tokens, track_ids, limit=100):
+def get_audio_features(
+    access_tokens: Text, track_ids: List[Text], limit: Optional[int] = 100
+) -> List[Dict]:
     """
     Gets the audio features from the `track_ids`.
 
@@ -147,6 +156,9 @@ def get_audio_features(access_tokens, track_ids, limit=100):
     list of dict
         list with the tracks audio features
     """
+    if not (0 < limit <= 100):
+        limit = 100
+        logger.warning(f'limit must be at most {limit}. setting value to {limit}')
     tracks = []
     size = len(track_ids)
     url = 'https://api.spotify.com/v1/audio-features?ids={}'
@@ -165,7 +177,9 @@ def get_audio_features(access_tokens, track_ids, limit=100):
     return tracks
 
 
-def get_artists(access_tokens, artist_ids, limit=100):
+def get_artists(
+    access_tokens: Text, artist_ids: List[Text], limit: Optional[int] = 100
+):
     """
     Gets the artists info from the `artist_ids`.
 
@@ -183,6 +197,9 @@ def get_artists(access_tokens, artist_ids, limit=100):
     list of dict
         list with the artists info
     """
+    if not (0 < limit <= 100):
+        limit = 100
+        logger.warning(f'limit must be at most {limit}. setting value to {limit}')
     artists = []
     size = len(artist_ids)
     url = 'https://api.spotify.com/v1/artists?ids={}'

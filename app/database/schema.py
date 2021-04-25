@@ -17,11 +17,28 @@ metadata = sqlalchemy.MetaData()
 
 
 class BaseMeta(ormar.ModelMeta):
+    """Base table metadata."""
+
     metadata = metadata
     database = db
 
 
 class User(ormar.Model):
+    """
+    `users` table mapping.
+
+    Attributes
+    ----------
+        id: str, primary key
+        display_name: str
+        href: str
+        email: str
+        country: str
+        uri: str
+        refresh_token: str
+        hashed_password: str
+    """
+
     class Meta(BaseMeta):
         tablename = 'users'
 
@@ -36,6 +53,16 @@ class User(ormar.Model):
 
 
 class UserToken(ormar.Model):
+    """
+    `user_tokens` table mapping.
+
+    Attributes
+    ----------
+        id: int, primary key
+        user: User, foreign key
+        access_token: str
+    """
+
     class Meta(BaseMeta):
         tablename = 'user_tokens'
 
@@ -45,6 +72,30 @@ class UserToken(ormar.Model):
 
 
 class Track(ormar.Model):
+    """
+    `tracks` table mapping.
+
+    Attributes
+    ----------
+        id: str, primary key
+        name: str
+        href: str
+        popularity: int, optional
+        danceability: float, optional
+        energy: float, optional
+        loudness: float, optional
+        speechiness: float, optional
+        acousticness: float, optional
+        instrumentalness: float, optional
+        liveness: float, optional
+        valence: float, optional
+        tempo: float, optional
+        key: int, optional
+        mode: int, optional
+        duration_ms: int, optional
+        time_signature: int, optional
+    """
+
     class Meta(BaseMeta):
         tablename = 'tracks'
 
@@ -68,6 +119,17 @@ class Track(ormar.Model):
 
 
 class Artist(ormar.Model):
+    """
+    `artists` table mapping.
+
+    Attributes
+    ----------
+        id: str, primary key
+        name: str
+        href: str
+        popularity: int, optional
+    """
+
     class Meta(BaseMeta):
         tablename = 'artists'
 
@@ -78,6 +140,16 @@ class Artist(ormar.Model):
 
 
 class Genre(ormar.Model):
+    """
+    `genres` table mapping.
+
+    Attributes
+    ----------
+        id: str, primary key
+        artist: Artist, foreign key
+        genre: str
+    """
+
     class Meta(BaseMeta):
         tablename = 'genres'
 
@@ -87,6 +159,16 @@ class Genre(ormar.Model):
 
 
 class TrackArtist(ormar.Model):
+    """
+    `tracks_artists` table mapping.
+
+    Attributes
+    ----------
+        id: str, primary key
+        artist: Artist, foreign key
+        track: Track, foreign key
+    """
+
     class Meta(BaseMeta):
         tablename = 'tracks_artists'
 
@@ -96,6 +178,17 @@ class TrackArtist(ormar.Model):
 
 
 class PlayedTrack(ormar.Model):
+    """
+    `played_tracks` table mapping.
+
+    Attributes
+    ----------
+        id: str, primary key
+        user: User, foreign key
+        track: Track, foreign key
+        played_at: datetime
+    """
+
     class Meta(BaseMeta):
         tablename = 'played_tracks'
 

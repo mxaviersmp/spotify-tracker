@@ -1,53 +1,52 @@
-from typing import List
 
 from fastapi import Depends, FastAPI, Request, status
 from fastapi.exceptions import HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.api.models import (
-    PlayedTrackModel,
-    Token,
-    UserModel,
-    UserPassword,
-    UserRefreshToken,
-)
-from app.api.security import (
+from app.api.dependencies.security import (
     authenticate_user,
     authorize_spotify,
     create_access_token,
-    get_current_user,
     get_password_hash,
 )
-from app.database.schema import PlayedTrack, User, UserToken, db
+from app.api.models import Token, UserModel, UserPassword, UserRefreshToken
+from app.api.routers import users
+from app.database.schema import User, UserToken, db
 from app.etl.spotify_api import get_refresh_token, get_user_me
 
 app = FastAPI(title='Spotify Stats', version='0.1.0')
+app.include_router(users.router)
 
 
 @app.on_event('startup')
 async def startup():
+    """Executes on application startup."""
     await db.connect()
 
 
 @app.on_event('shutdown')
 async def shutdown():
+    """Executes on application shutdown."""
     await db.disconnect()
 
 
 @app.get('/')
 async def root():
+    """Return status."""
     return {'status': 'ok'}
 
 
 @app.get('/authorize', responses={307: {'description': 'Temporary Redirect'}})
 async def authorize():
+    """Redirects to spotify authorization."""
     url = authorize_spotify()
     return RedirectResponse(url.get('spotify'))
 
 
 @app.post('/register', response_model=UserModel, status_code=201)
 async def register(user: UserPassword = None):
+    """Register user on the application."""
     user = user.dict()
     user['hashed_password'] = get_password_hash(user.pop('password'))
     user = await User.objects.create(**user)
@@ -57,6 +56,7 @@ async def register(user: UserPassword = None):
 
 @app.get('/callback', response_model=UserRefreshToken)
 async def callback(request: Request = None):
+    """Callback from spotify authorization. Gets user refresh token and info."""
     code = request.query_params.get('code')
     tokens = get_refresh_token(code)
 
@@ -69,7 +69,8 @@ async def callback(request: Request = None):
 
 
 @app.post('/token', response_model=Token)
-async def token(form_data: OAuth2PasswordRequestForm = Depends()): # noqa
+async def token(form_data: OAuth2PasswordRequestForm = Depends()):  # noqa:B008
+    """Authenticates user and creates an access token."""
     user = await authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -79,16 +80,3 @@ async def token(form_data: OAuth2PasswordRequestForm = Depends()): # noqa
         )
     access_token = create_access_token(data={'sub': user.id})
     return {'access_token': access_token, 'token_type': 'bearer'}
-
-
-@app.get('/users/me', response_model=UserModel, tags=['users'])
-async def me(current_user: UserModel = Depends(get_current_user)): # noqa
-    return current_user
-
-
-@app.get('/users/me/played-tracks', response_model=List[PlayedTrackModel], tags=['users'])
-async def played_tracks(current_user: UserModel = Depends(get_current_user)): # noqa
-    played_tracks = await PlayedTrack.objects.select_related(
-        ['artist', 'track']
-    ).all(user=current_user.id)
-    return played_tracks
