@@ -25,14 +25,14 @@ class User(ormar.Model):
     class Meta(BaseMeta):
         tablename = 'users'
 
-    id = ormar.String(max_length=256, primary_key=True)
-    display_name = ormar.String(max_length=256)
-    href = ormar.String(max_length=256)
-    email = ormar.String(max_length=256)
-    country = ormar.String(max_length=256)
-    uri = ormar.String(max_length=256)
-    refresh_token = ormar.String(max_length=256)
-    hashed_password = ormar.String(max_length=256)
+    id = ormar.Text(primary_key=True)
+    display_name = ormar.Text()
+    href = ormar.Text()
+    email = ormar.Text()
+    country = ormar.Text()
+    uri = ormar.Text()
+    refresh_token = ormar.Text()
+    hashed_password = ormar.Text()
 
 
 class UserToken(ormar.Model):
@@ -41,16 +41,16 @@ class UserToken(ormar.Model):
 
     id = ormar.Integer(primary_key=True, autoincrement=True)
     user = ormar.ForeignKey(User)
-    access_token = ormar.String(max_length=256, nullable=True)
+    access_token = ormar.Text(nullable=True)
 
 
 class Track(ormar.Model):
     class Meta(BaseMeta):
         tablename = 'tracks'
 
-    id = ormar.String(max_length=256, primary_key=True)
-    name = ormar.String(max_length=256)
-    href = ormar.String(max_length=256)
+    id = ormar.Text(primary_key=True)
+    name = ormar.Text()
+    href = ormar.Text()
     popularity = ormar.Integer()
     danceability = ormar.Float(nullable=True)
     energy = ormar.Float(nullable=True)
@@ -71,11 +71,28 @@ class Artist(ormar.Model):
     class Meta(BaseMeta):
         tablename = 'artists'
 
-    id = ormar.String(max_length=256, primary_key=True)
-    name = ormar.String(max_length=256)
-    href = ormar.String(max_length=256)
+    id = ormar.Text(primary_key=True)
+    name = ormar.Text()
+    href = ormar.Text()
     popularity = ormar.Integer(nullable=True)
-    genres = ormar.String(max_length=256, nullable=True)
+
+
+class Genre(ormar.Model):
+    class Meta(BaseMeta):
+        tablename = 'genres'
+
+    id = ormar.Integer(primary_key=True, autoincrement=True)
+    artist = ormar.ForeignKey(Artist)
+    genre = ormar.Text()
+
+
+class TrackArtist(ormar.Model):
+    class Meta(BaseMeta):
+        tablename = 'tracks_artists'
+
+    id = ormar.Integer(primary_key=True, autoincrement=True)
+    artist = ormar.ForeignKey(Artist)
+    track = ormar.ForeignKey(Track)
 
 
 class PlayedTrack(ormar.Model):
@@ -85,7 +102,6 @@ class PlayedTrack(ormar.Model):
     id = ormar.Integer(primary_key=True, autoincrement=True)
     user = ormar.ForeignKey(User)
     track = ormar.ForeignKey(Track)
-    artist = ormar.ForeignKey(Artist)
     played_at = ormar.DateTime()
 
 
