@@ -22,7 +22,7 @@ async def main():
         # await UserToken.objects.bulk_create(
         #     [UserToken(user=u) for u in users]
         # )
-        response = await User.objects.all()
+        response = await User.objects.get(email='abc')
         print(response)
     return
 

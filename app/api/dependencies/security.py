@@ -1,39 +1,26 @@
-import os
 from datetime import datetime, timedelta
-from typing import Dict, Mapping, Optional, Text
+from typing import Dict, List, Mapping, Optional, Text
 
 import requests
 from fastapi import Depends, status
 from fastapi.exceptions import HTTPException
-from fastapi.security.oauth2 import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+from pydantic import ValidationError
 
+from app.api.crud.user import get_user
+from app.api.dependencies.config import SETTINGS
 from app.api.models import TokenData, UserModel
-from app.database.schema import User
 
-CLIENT_ID = os.getenv('CLIENT_ID')
-CLIENT_SECRET = os.getenv('CLIENT_SECRET')
-OAUTH_AUTHORIZE_URL = os.getenv('OAUTH_AUTHORIZE_URL')
-OAUTH_TOKEN_URL = os.getenv('OAUTH_TOKEN_URL')
-REDIRECT_URI = os.getenv('REDIRECT_URI')
-SCOPE = os.getenv('SCOPE')
-B64_CLIENT = os.getenv('B64_CLIENT')
-SECRET_KEY = os.getenv('SECRET_KEY')
-ALGORITHM = os.getenv('ALGORITHM')
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES'))
-TOKEN_DATA = {
-    'client_id' : CLIENT_ID,
-    'response_type' : 'code',
-    'redirect_uri' : REDIRECT_URI,
-    'scope': SCOPE
-}
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token')
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl='token',
+    scopes={'user': 'Read information about the current user.', 'item': 'reads items'},
+)
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 
-def authorize_spotify():
+def authorize_spotify() -> Dict:
     """
     Generates url for spotify authorization.
 
@@ -42,13 +29,22 @@ def authorize_spotify():
     dict
         spotify authorization url
     """
-    response = requests.get(OAUTH_AUTHORIZE_URL, params=TOKEN_DATA)
+    response = requests.get(
+        SETTINGS.oauth_authorize_url,
+        params={
+            'client_id' : SETTINGS.client_id,
+            'response_type' : 'code',
+            'redirect_uri' : SETTINGS.redirect_uri,
+            'scope': SETTINGS.scope
+        }
+    )
     url = response.url
     return {'spotify': url}
 
 
 def create_access_token(
-    data: Dict, expires_minutes: Optional[int] = ACCESS_TOKEN_EXPIRE_MINUTES
+    data: Dict,
+    expires: Optional[bool] = True
 ) -> Text:
     """
     Creates a jwt token from the data.
@@ -57,8 +53,8 @@ def create_access_token(
     ----------
     data : dict
         data to be encoded
-    expires_delta : int, optional
-        token expiration time, by default ACCESS_TOKEN_EXPIRE_MINUTES
+    expires: bool, optional
+        wether the token expires, default True
 
     Returns
     -------
@@ -66,14 +62,18 @@ def create_access_token(
         jwt token
     """
     to_encode = data.copy()
-    if expires_minutes:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    if expires:
+        expire = datetime.utcnow() + timedelta(
+            minutes=SETTINGS.access_token_expire_minutes
+        )
     to_encode.update({'exp': expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, SETTINGS.secret_key, algorithm=SETTINGS.algorithm)
     return encoded_jwt
 
 
-def decode_access_token(token: Text) -> Mapping:
+def decode_access_token(
+    token: Text
+) -> Mapping:
     """
     Decodes a jwt token.
 
@@ -87,10 +87,12 @@ def decode_access_token(token: Text) -> Mapping:
     mapping
         decoded token
     """
-    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    return jwt.decode(token, SETTINGS.secret_key, algorithms=[SETTINGS.algorithm])
 
 
-async def authenticate_user(email: Text, password: Text) -> Optional[UserModel]:
+async def authenticate_user(
+    email: Text, password: Text, scopes: List[str]
+) -> Optional[UserModel]:
     """
     Authenticates user  with email and password and return.
 
@@ -100,15 +102,32 @@ async def authenticate_user(email: Text, password: Text) -> Optional[UserModel]:
         user email
     password : str
         user password
+    scopes : list of str
+        user scopes
 
     Returns
     -------
-    UserMe
+    UserModel
         user if valid
     """
-    user = await User.objects.get(email=email)
+    authenticate_value = 'Bearer'
+    user = await get_user({'email': email})
     if user and verify_password(password, user.hashed_password):
+        user_scopes = user.scopes.split()
+        for scope in scopes:
+            if scope not in user_scopes:
+                authenticate_value = f'Bearer scope="{" ".join(scopes)}"'
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail='Not enough permissions',
+                    headers={'WWW-Authenticate': authenticate_value},
+                )
         return UserModel(**user.dict())
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail='Incorrect username or password',
+        headers={'WWW-Authenticate': authenticate_value},
+    )
 
 
 def verify_password(plain_password: Text, hashed_password: Text) -> bool:
@@ -147,12 +166,16 @@ def get_password_hash(password: Text) -> Text:
     return pwd_context.hash(password)
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserModel: # noqa
+async def get_current_user(
+    security_scopes: SecurityScopes, token: str = Depends(oauth2_scheme)  # noqa:B008
+) -> UserModel:
     """
     Gets user from token.
 
     Parameters
     ----------
+    security_scopes: SecurityScopes
+        scopes
     token : str, optional
         jwt token, by default Depends(oauth2_scheme)
 
@@ -168,21 +191,33 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserModel: # 
         if jwt token doesn't has userid
         if user doesn't exists
     """
+    if security_scopes.scopes:
+        authenticate_value = f'Bearer scope="{security_scopes.scope_str}"'
+    else:
+        authenticate_value = 'Bearer'
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail='Could not validate credentials',
-        headers={'WWW-Authenticate': 'Bearer'},
+        headers={'WWW-Authenticate': authenticate_value},
     )
     try:
         payload = decode_access_token(token)
         userid = payload.get('sub')
         if userid is None:
             raise credentials_exception
-        token_data = TokenData(id=userid)
-    except JWTError:
+        token_scopes = payload.get('scopes', [])
+        token_data = TokenData(id=userid, scopes=token_scopes)
+    except (JWTError, ValidationError):
         raise credentials_exception
-    user = await User.objects.get(id=token_data.id)
+    user = await get_user({'id': token_data.id})
     if user is None:
         raise credentials_exception
+    for scope in security_scopes.scopes:
+        if scope not in token_data.scopes:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail='Not enough permissions',
+                headers={'WWW-Authenticate': authenticate_value},
+            )
     user = UserModel(**user.dict())
     return user

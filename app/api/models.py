@@ -28,9 +28,12 @@ class TokenData(BaseModel):
     ----------
         id: str, optional
             user id
+        scopes: list of str
+            authorized scoped
     """
 
     id: Optional[str] = None
+    scopes: List[str] = []
 
 
 class UserModel(BaseModel):

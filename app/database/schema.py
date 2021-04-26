@@ -37,6 +37,7 @@ class User(ormar.Model):
         uri: str
         refresh_token: str
         hashed_password: str
+        scopes: str
     """
 
     class Meta(BaseMeta):
@@ -50,6 +51,7 @@ class User(ormar.Model):
     uri = ormar.Text()
     refresh_token = ormar.Text()
     hashed_password = ormar.Text()
+    scopes = ormar.Text()
 
 
 class UserToken(ormar.Model):
@@ -204,5 +206,17 @@ if __name__ == '__main__':
     # note that this is not required if you connect to existing database
     engine = sqlalchemy.create_engine(DB_URL)
     # just to be sure we clear the db before
-    metadata.drop_all(engine)
-    metadata.create_all(engine)
+    # metadata.drop_all(engine)
+    # metadata.create_all(engine)
+
+    def add_column(engine, table_name, column):
+        """Adds column to table."""
+        column_name = column.compile(dialect=engine.dialect)
+        column_type = column.type.compile(engine.dialect)
+        engine.execute(
+            'ALTER TABLE %s ADD COLUMN %s %s' % (table_name, column_name, column_type)
+        )
+
+    table_name = 'users'
+    column = sqlalchemy.Column('scopes', sqlalchemy.types.Text())
+    add_column(engine, table_name, column)
