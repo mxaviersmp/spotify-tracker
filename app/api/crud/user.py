@@ -1,3 +1,4 @@
+from asyncpg.exceptions import UniqueViolationError
 from ormar.exceptions import NoMatch
 
 from app.database.schema import User, UserToken
@@ -14,6 +15,8 @@ async def get_user(query):
 
 async def create_user(user):
     """Create new user on database."""
-    user = await User.objects.create(**user)
-    await UserToken.objects.create(user=user)
-    return user
+    try:
+        user = await User.objects.create(**user)
+        await UserToken.objects.create(user=user)
+    except UniqueViolationError:
+        return None

@@ -1,7 +1,7 @@
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.api.crud.user import create_user
@@ -48,20 +48,28 @@ async def root():
     return {'status': 'ok'}
 
 
-@app.get('/authorize', responses={307: {'description': 'Temporary Redirect'}})
+@app.get(
+    '/authorize',
+    responses={status.HTTP_307_TEMPORARY_REDIRECT: {'description': 'Temporary Redirect'}}
+)
 async def authorize():
     """Redirects to spotify authorization."""
     url = authorize_spotify()
     return RedirectResponse(url.get('spotify'))
 
 
-@app.post('/register', response_model=UserModel, status_code=201)
+@app.post('/register', response_model=UserModel, status_code=status.HTTP_201_CREATED)
 async def register(user: UserPassword = None):
     """Register user on the application."""
     user = user.dict()
     user['hashed_password'] = get_password_hash(user.pop('password'))
     user['scopes'] = 'user'
     user = await create_user(user)
+    if not user:
+        return JSONResponse(
+            content='user already exists',
+            status_code=status.HTTP_200_OK
+        )
     return UserModel(**user.dict())
 
 

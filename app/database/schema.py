@@ -44,9 +44,9 @@ class User(ormar.Model):
         tablename = 'users'
 
     id = ormar.Text(primary_key=True)
+    email = ormar.Text(unique=True)
     display_name = ormar.Text()
     href = ormar.Text()
-    email = ormar.Text()
     country = ormar.Text()
     uri = ormar.Text()
     refresh_token = ormar.Text()
@@ -206,17 +206,5 @@ if __name__ == '__main__':
     # note that this is not required if you connect to existing database
     engine = sqlalchemy.create_engine(DB_URL)
     # just to be sure we clear the db before
-    # metadata.drop_all(engine)
-    # metadata.create_all(engine)
-
-    def add_column(engine, table_name, column):
-        """Adds column to table."""
-        column_name = column.compile(dialect=engine.dialect)
-        column_type = column.type.compile(engine.dialect)
-        engine.execute(
-            'ALTER TABLE %s ADD COLUMN %s %s' % (table_name, column_name, column_type)
-        )
-
-    table_name = 'users'
-    column = sqlalchemy.Column('scopes', sqlalchemy.types.Text())
-    add_column(engine, table_name, column)
+    metadata.drop_all(engine)
+    metadata.create_all(engine)

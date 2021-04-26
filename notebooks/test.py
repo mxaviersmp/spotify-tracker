@@ -16,14 +16,8 @@ from app.database.schema import (
 
 async def main():
     async with db:
-        # await User.objects.bulk_create(
-        #     [User(**u) for u in users]
-        # )
-        # await UserToken.objects.bulk_create(
-        #     [UserToken(user=u) for u in users]
-        # )
-        response = await User.objects.get(email='abc')
-        print(response)
+        response = await User.objects.all()
+        print(response[1].json())
     return
 
 
