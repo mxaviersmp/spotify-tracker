@@ -28,18 +28,23 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
+app.state.database = db
 
 
 @app.on_event('startup')
 async def startup():
     """Executes on application startup."""
-    await db.connect()
+    database_ = app.state.database
+    if not database_.is_connected:
+        await database_.connect()
 
 
 @app.on_event('shutdown')
 async def shutdown():
     """Executes on application shutdown."""
-    await db.disconnect()
+    database_ = app.state.database
+    if database_.is_connected:
+        await database_.disconnect()
 
 
 @app.get('/')

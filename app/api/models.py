@@ -2,6 +2,8 @@ from datetime import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel
+from pydantic.class_validators import validator
+from pydantic.fields import Field
 
 
 class Token(BaseModel):
@@ -115,42 +117,26 @@ class TrackModel(BaseModel):
             track name
         href: str, optional
             track http url
-        tracks_artists: list of Artist, optional
-            track artists
         popularity: int, optional
-        danceability: float, optional
-        energy: float, optional
-        loudness: float, optional
-        speechiness: float, optional
-        acousticness: float, optional
-        instrumentalness: float, optional
-        liveness: float, optional
-        valence: float, optional
-        tempo: float, optional
-        key: int, optional
-        mode: int, optional
-        duration_ms: int, optional
-        time_signature: int, optional
+            track popularity in spotify
+        artists: list of str, optional
+            track artists names
+        count: int, optional
+            number of times track was played
     """
 
     id: str
-    name: Optional[str]
-    href: Optional[str]
-    popularity: Optional[int]
-    artists: Optional[List['ArtistModel']]
-    danceability: Optional[float]
-    energy: Optional[float]
-    loudness: Optional[float]
-    speechiness: Optional[float]
-    acousticness: Optional[float]
-    instrumentalness: Optional[float]
-    liveness: Optional[float]
-    valence: Optional[float]
-    tempo: Optional[float]
-    key: Optional[float]
-    mode: Optional[float]
-    duration_ms: Optional[float]
-    time_signature: Optional[float]
+    name: str
+    href: str
+    uri: str
+    popularity: str
+    artists: Optional[List[str]] = Field(alias='trackartists')
+    count: Optional[int]
+
+    @validator('artists', pre=True, each_item=True)
+    def extract_artists_names(cls, value):  # noqa:N805
+        """Extracts names of the artists from Artist."""
+        return value.get('artist').get('name')
 
 
 class ArtistModel(BaseModel):
@@ -174,11 +160,22 @@ class ArtistModel(BaseModel):
     """
 
     id: str
-    name: Optional[str]
-    href: Optional[str]
-    popularity: Optional[int]
-    tracks: Optional[List['TrackModel']]
+    name: str
+    href: str
+    uri: str
+    popularity: int
+    tracks: Optional[List[str]] = Field(alias='trackartists')
     genres: Optional[List[str]]
+
+    @validator('tracks', pre=True, each_item=True)
+    def extract_artists_names(cls, value):  # noqa:N805
+        """Extracts names of the tracks from Track."""
+        return value.get('track').get('name')
+
+    @validator('genres', pre=True, each_item=True)
+    def extract_genres_names(cls, value):  # noqa:N805
+        """Extracts names of the genre from Genre."""
+        return value.get('genre')
 
 
 class GenreModel(BaseModel):
@@ -238,7 +235,3 @@ class PlayedTrackModel(BaseModel):
     id: int
     track: TrackModel
     played_at: datetime
-
-
-TrackModel.update_forward_refs()
-ArtistModel.update_forward_refs()
