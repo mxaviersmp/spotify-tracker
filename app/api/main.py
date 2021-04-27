@@ -1,8 +1,11 @@
+from pathlib import Path
 
-from fastapi import Depends, FastAPI, Request, status
+from fastapi import Depends, FastAPI, Form, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.templating import Jinja2Templates
+from starlette.responses import HTMLResponse
 
 from app.api.crud.user import create_user
 from app.api.dependencies.security import (
@@ -11,7 +14,7 @@ from app.api.dependencies.security import (
     create_access_token,
     get_password_hash,
 )
-from app.api.models import Token, UserModel, UserPassword, UserRefreshToken
+from app.api.models import Token
 from app.api.routers import items, user
 from app.database.schema import db
 from app.etl.spotify_api import get_refresh_token, get_user_me
@@ -30,6 +33,7 @@ app.add_middleware(
     allow_headers=['*'],
 )
 app.state.database = db
+templates = Jinja2Templates(directory=Path(__file__).resolve().parent / 'templates')
 
 
 @app.on_event('startup')
@@ -56,6 +60,7 @@ async def root():
 
 @app.get(
     '/authorize',
+    response_class=RedirectResponse,
     responses={status.HTTP_307_TEMPORARY_REDIRECT: {'description': 'Temporary Redirect'}}
 )
 async def authorize():
@@ -64,22 +69,7 @@ async def authorize():
     return RedirectResponse(url.get('spotify'))
 
 
-@app.post('/register', response_model=UserModel, status_code=status.HTTP_201_CREATED)
-async def register(user: UserPassword = None):
-    """Register user on the application."""
-    user = user.dict()
-    user['hashed_password'] = get_password_hash(user.pop('password'))
-    user['scopes'] = 'user'
-    user = await create_user(user)
-    if not user:
-        return JSONResponse(
-            content='user already exists',
-            status_code=status.HTTP_200_OK
-        )
-    return UserModel(**user.dict())
-
-
-@app.get('/callback', response_model=UserRefreshToken)
+@app.get('/callback', response_class=HTMLResponse)
 async def callback(request: Request = None):
     """Callback from spotify authorization. Gets user refresh token and info."""
     code = request.query_params.get('code')
@@ -90,7 +80,42 @@ async def callback(request: Request = None):
     user = get_user_me(access_token)
     user['refresh_token'] = refresh_token
 
-    return UserRefreshToken(**user)
+    return templates.TemplateResponse(
+        'register.html',
+        context={**user, 'request': request}
+    )
+
+
+@app.post('/register', status_code=status.HTTP_201_CREATED)
+async def register(
+    id: str = Form(...),  # noqa:B008
+    display_name: str = Form(...),  # noqa:B008
+    email: str = Form(...),  # noqa:B008
+    country: str = Form(...),  # noqa:B008
+    uri: str = Form(...),  # noqa:B008
+    href: str = Form(...),  # noqa:B008
+    refresh_token: str = Form(...),  # noqa:B008
+    password: str = Form(...)  # noqa:B008
+):
+    """Register user on the application."""
+    user = {
+        'id': id,
+        'display_name': display_name,
+        'email': email,
+        'country': country,
+        'uri': uri,
+        'href': href,
+        'refresh_token': refresh_token,
+        'hashed_password': get_password_hash(password),
+        'scopes': 'user'
+    }
+    user = await create_user(user)
+    if not user:
+        return JSONResponse(
+            content='user already exists',
+            status_code=status.HTTP_200_OK
+        )
+    return 'user created. please sign in'
 
 
 @app.post('/token', response_model=Token)
