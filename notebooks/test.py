@@ -1,8 +1,9 @@
 import asyncio
+import json
 
 from rich import print
 
-from app.database.schema import (
+from app.database.schema import (  # TrackArtist,
     Artist,
     Genre,
     PlayedTrack,
@@ -14,16 +15,26 @@ from app.database.schema import (
 )
 
 
+async def add_users():
+    async with db:
+        with open('users.json~') as f:
+            users = json.load(f)
+        await User.objects.bulk_create(
+            [User(**u) for u in users]
+        )
+        await UserToken.objects.bulk_create(
+            [UserToken(user=u.get('id')) for u in users]
+        )
+    return
+
+
 async def main():
     async with db:
-        # await User.objects.bulk_create(
-        #     [User(**u) for u in users]
-        # )
-        # await UserToken.objects.bulk_create(
-        #     [UserToken(user=u) for u in users]
-        # )
-        response = await Genre.objects.all()
-        print(response)
+        query = {'id': 'flycher'}
+        resp = await User.objects.get(**query)
+        resp.scopes = 'admin user items'
+        await resp.update()
+        print(resp)
     return
 
 
