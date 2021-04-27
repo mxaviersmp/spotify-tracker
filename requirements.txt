@@ -7,3 +7,6 @@ uvicorn
 python-jose[cryptography]
 passlib[bcrypt]
 python-multipart
+jinja2
+aiofiles
+streamlit

@@ -46,7 +46,7 @@ async def get_played_tracks():
     async with db:
         tokens = await UserToken.objects.all()
         today = datetime.datetime.now()
-        yesterday = today - datetime.timedelta(days=30)
+        yesterday = today - datetime.timedelta(days=1)
         yesterday_unix_timestamp = int(yesterday.timestamp()) * 1000
         all_tracks = []
         for token in tokens:
@@ -74,10 +74,10 @@ async def save_new_artists(all_tracks):
     async with db:
         new_artists = [track.get('track').get('artists') for track in all_tracks]
         new_artists = sum(new_artists, [])
-        new_artists = select_dict_keys(new_artists, ['id', 'name', 'href'])
+        new_artists = select_dict_keys(new_artists, ['id', 'name', 'href', 'uri'])
 
         existing_artists = await Artist.objects.fields(
-            ['id', 'name', 'href']
+            ['id', 'name', 'href', 'uri']
         ).all()
         existing_artists = [artist.id for artist in existing_artists]
 
@@ -100,7 +100,7 @@ async def save_new_tracks(all_tracks):
         new_tracks = [track.get('track') for track in all_tracks]
 
         existing_tracks = await Track.objects.fields(
-            ['id', 'name', 'href', 'popularity']
+            ['id', 'name', 'href', 'uri', 'popularity']
         ).all()
         existing_tracks = [track.id for track in existing_tracks]
 
@@ -111,7 +111,10 @@ async def save_new_tracks(all_tracks):
             {'track': track.get('id'), 'artist': artist.get('id')}
             for track in new_tracks for artist in track.get('artists')
         ]
-        new_tracks = select_dict_keys(new_tracks, ['id', 'name', 'href', 'popularity'])
+        new_tracks = select_dict_keys(
+            new_tracks,
+            ['id', 'name', 'href', 'uri', 'popularity']
+        )
         await Track.objects.bulk_create([
             Track(**track) for track in new_tracks
         ])
