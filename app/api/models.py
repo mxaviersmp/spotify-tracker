@@ -166,9 +166,10 @@ class ArtistModel(BaseModel):
     popularity: int
     tracks: Optional[List[str]] = Field(alias='trackartists')
     genres: Optional[List[str]]
+    count: Optional[int]
 
     @validator('tracks', pre=True, each_item=True)
-    def extract_artists_names(cls, value):  # noqa:N805
+    def extract_tracks_names(cls, value):  # noqa:N805
         """Extracts names of the tracks from Track."""
         return value.get('track').get('name')
 

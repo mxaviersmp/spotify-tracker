@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Dict, List, Optional, Union
 
-from fastapi import APIRouter, Security
+from fastapi import APIRouter, Query, Security
 
 from app.api.crud.played_tracks import (
     get_artists,
@@ -10,6 +10,7 @@ from app.api.crud.played_tracks import (
     get_played_tracks,
     get_tracks,
 )
+from app.api.dependencies.config import AUDIO_FEATURES
 from app.api.dependencies.security import get_current_user
 from app.api.models import ArtistModel, PlayedTrackModel, TrackModel, UserModel
 
@@ -58,15 +59,20 @@ async def artists(
     return await get_artists({'user': current_user.id})
 
 
-@router.get('/audio-features', response_model=List[Dict[str, List[Union[float, int]]]])
+@router.get('/audio-features', response_model=Dict[str, List[Union[float, int]]])
 async def audio_features(
+    features: List[str] = Query(  # noqa: B008
+        AUDIO_FEATURES,
+        description='List of features to get. Accepted values in default'
+    ),
     current_user: UserModel = Security(get_current_user, scopes=['user'])  # noqa:B008
 ):
     """User played tracks audio features."""
-    return await get_audio_features({'user': current_user.id})
+    features = [*(set(AUDIO_FEATURES) & set(features))]
+    return await get_audio_features({'user': current_user.id}, features)
 
 
-@router.get('/genres', response_model=List[Dict[str, int]])
+@router.get('/genres', response_model=Dict[str, int])
 async def genres(
     current_user: UserModel = Security(get_current_user, scopes=['user'])  # noqa:B008
 ):

@@ -17,3 +17,20 @@ class Settings(BaseSettings):
 
 
 SETTINGS = Settings()
+
+AUDIO_FEATURES = [
+    'popularity',
+    'danceability',
+    'energy',
+    'loudness',
+    'speechiness',
+    'acousticness',
+    'instrumentalness',
+    'liveness',
+    'valence',
+    'tempo',
+    'key',
+    'mode',
+    'duration_ms',
+    'time_signature',
+]

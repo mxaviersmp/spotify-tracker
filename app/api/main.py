@@ -12,12 +12,13 @@ from app.api.dependencies.security import (
     get_password_hash,
 )
 from app.api.models import Token, UserModel, UserPassword, UserRefreshToken
-from app.api.routers import user
+from app.api.routers import items, user
 from app.database.schema import db
 from app.etl.spotify_api import get_refresh_token, get_user_me
 
-app = FastAPI(title='Spotify Stats', version='0.1.0')
+app = FastAPI(title='Spotify Tracker', version='1.0.0')
 app.include_router(user.router)
+app.include_router(items.router)
 origins = [
     'http://localhost',
 ]

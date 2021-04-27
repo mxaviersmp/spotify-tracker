@@ -15,7 +15,10 @@ from app.api.models import TokenData, UserModel
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl='token',
-    scopes={'user': 'Read information about the current user.', 'item': 'reads items'},
+    scopes={
+        'user': 'Read information about the current user.',
+        'items': 'Read information about all items.'
+    },
 )
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
