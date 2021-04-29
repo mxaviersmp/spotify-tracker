@@ -1,4 +1,5 @@
 aiofiles
+alembic
 fastapi
 jinja2
 loguru

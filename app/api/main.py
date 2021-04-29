@@ -8,6 +8,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.responses import HTMLResponse
 
 from app import __version__
+from app.api.crud.admin import update_user
 from app.api.crud.user import create_user
 from app.api.dependencies.config import SETTINGS
 from app.api.dependencies.security import (
@@ -17,7 +18,7 @@ from app.api.dependencies.security import (
     get_password_hash,
 )
 from app.api.models import Token
-from app.api.routers import items, user
+from app.api.routers import admin, items, user
 from app.database.schema import db
 from app.etl.spotify_api import get_refresh_token, get_user_me
 
@@ -29,6 +30,7 @@ app = FastAPI(
 )
 app.include_router(user.router)
 app.include_router(items.router)
+app.include_router(admin.router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -116,10 +118,23 @@ async def register(
     }
     user = await create_user(user)
     if not user:
-        return JSONResponse(
-            content='user already exists',
-            status_code=status.HTTP_200_OK
-        )
+        user = await authenticate_user(email, password)
+        if not user:
+            return JSONResponse(
+                content='user already exists',
+                status_code=status.HTTP_200_OK
+            )
+        user.display_name = display_name
+        user.country = country
+        user.uri = uri
+        user.href = href
+        user.refresh_token = refresh_token
+        user_scopes = user.scopes
+        user_scopes = set(user_scopes.split())
+        user_scopes.add('user')
+        user.scopes = ' '.join(user_scopes)
+        await update_user(user)
+        return 'user updated'
     return 'user created. please sign in'
 
 

@@ -37,3 +37,6 @@ for dir in dags_dirs:
 - `$ sls deploy --region "us-east-1" --stage "dev"`
 - `$ sls invoke -f app --path notebooks/data.json --log`
 - `$ sls remove --region "us-east-1" --stage "dev"`
+
+- `$ alembic revision --autogenerate`
+- `$ bash pre_start.sh`

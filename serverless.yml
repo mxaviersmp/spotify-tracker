@@ -7,7 +7,7 @@ provider:
   lambdaHashingVersion: 20201221
   runtime: python3.8
   region: ${opt:region, 'us-east-1'}
-  stage: ${opt:stage, 'test'}
+  stage: ${opt:stage, 'dev'}
   profile: ${opt:aws-profile , 'default'}
   environment:
     REGION: ${self:provider.region}
@@ -36,7 +36,7 @@ functions:
         - ${self:custom.securityGroup.db}
       subnetIds: []
     environment:
-      APP_ENV: ${opt:stage, 'test'}
+      APP_ENV: ${opt:stage, 'dev'}
       APP_LAMBDA: true
       SECRET_KEY: ${env:SECRET_KEY}
       ALGORITHM: ${env:ALGORITHM}

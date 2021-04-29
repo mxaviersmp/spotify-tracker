@@ -1,22 +1,9 @@
-import os
 from datetime import datetime
 from typing import Optional
 
-import databases
 import ormar
-import sqlalchemy
 
-DB_CONNECTOR = os.getenv('DB_CONNECTOR')
-DB_USERNAME = os.getenv('DB_USERNAME')
-DB_PASSWORD = os.getenv('DB_PASSWORD')
-DB_HOST = os.getenv('DB_HOST')
-DB_PORT = os.getenv('DB_PORT')
-DB_DATABASE = os.getenv('DB_DATABASE')
-
-DB_URL = f'{DB_CONNECTOR}://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_DATABASE}'
-
-db = databases.Database(DB_URL)
-metadata = sqlalchemy.MetaData()
+from app.database.db import db, metadata
 
 
 class BaseMeta(ormar.ModelMeta):
@@ -44,15 +31,15 @@ class User(ormar.Model):
     """
 
     class Meta(BaseMeta):
-        tablename = 'users'
+        pass
 
     id: str = ormar.Text(primary_key=True)
     email: str = ormar.Text(unique=True)
-    display_name: str = ormar.Text()
-    href: str = ormar.Text()
-    country: str = ormar.Text()
-    uri: str = ormar.Text()
-    refresh_token: str = ormar.Text()
+    display_name: str = ormar.Text(nullable=True)
+    href: str = ormar.Text(nullable=True)
+    country: str = ormar.Text(nullable=True)
+    uri: str = ormar.Text(nullable=True)
+    refresh_token: str = ormar.Text(nullable=True)
     hashed_password: str = ormar.Text()
     scopes: str = ormar.Text()
 
@@ -69,7 +56,7 @@ class UserToken(ormar.Model):
     """
 
     class Meta(BaseMeta):
-        tablename = 'user_tokens'
+        pass
 
     id: str = ormar.Integer(primary_key=True, autoincrement=True)
     user: User = ormar.ForeignKey(User)
@@ -102,7 +89,7 @@ class Track(ormar.Model):
     """
 
     class Meta(BaseMeta):
-        tablename = 'tracks'
+        pass
 
     id: str = ormar.Text(primary_key=True)
     name: str = ormar.Text()
@@ -137,7 +124,7 @@ class Artist(ormar.Model):
     """
 
     class Meta(BaseMeta):
-        tablename = 'artists'
+        pass
 
     id: str = ormar.Text(primary_key=True)
     name: str = ormar.Text()
@@ -158,7 +145,7 @@ class Genre(ormar.Model):
     """
 
     class Meta(BaseMeta):
-        tablename = 'genres'
+        pass
 
     id: int = ormar.Integer(primary_key=True, autoincrement=True)
     artist: Artist = ormar.ForeignKey(Artist)
@@ -177,7 +164,7 @@ class TrackArtist(ormar.Model):
     """
 
     class Meta(BaseMeta):
-        tablename = 'tracks_artists'
+        pass
 
     id: str = ormar.Integer(primary_key=True, autoincrement=True)
     artist: Artist = ormar.ForeignKey(Artist)
@@ -197,19 +184,9 @@ class PlayedTrack(ormar.Model):
     """
 
     class Meta(BaseMeta):
-        tablename = 'played_tracks'
+        pass
 
     id: int = ormar.Integer(primary_key=True, autoincrement=True)
     user: User = ormar.ForeignKey(User)
     track: Track = ormar.ForeignKey(Track)
     played_at: datetime = ormar.DateTime()
-
-
-if __name__ == '__main__':
-    # create the database
-    # note that in production you should use migrations
-    # note that this is not required if you connect to existing database
-    engine = sqlalchemy.create_engine(DB_URL)
-    # just to be sure we clear the db before
-    metadata.drop_all(engine)
-    metadata.create_all(engine)

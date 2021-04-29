@@ -12,12 +12,14 @@ from pydantic import ValidationError
 from app.api.crud.user import get_user
 from app.api.dependencies.config import SETTINGS
 from app.api.models import TokenData, UserModel
+from app.database.schema import User
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl='token',
     scopes={
         'user': 'Read information about the current user.',
-        'items': 'Read information about all items.'
+        'items': 'Read information about all items.',
+        'admin': 'Admin privileges'
     },
 )
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
@@ -94,8 +96,8 @@ def decode_access_token(
 
 
 async def authenticate_user(
-    email: Text, password: Text, scopes: List[str]
-) -> Optional[UserModel]:
+    email: Text, password: Text, scopes: Optional[List[str]] = None
+) -> Optional[User]:
     """
     Authenticates user  with email and password and return.
 
@@ -105,14 +107,16 @@ async def authenticate_user(
         user email
     password : str
         user password
-    scopes : list of str
-        user scopes
+    scopes : list of str, optional
+        user scopes, default []
 
     Returns
     -------
     UserModel
         user if valid
     """
+    if not scopes:
+        scopes = []
     authenticate_value = 'Bearer'
     user = await get_user({'email': email})
     if user and verify_password(password, user.hashed_password):
@@ -125,7 +129,7 @@ async def authenticate_user(
                     detail='Not enough permissions',
                     headers={'WWW-Authenticate': authenticate_value},
                 )
-        return UserModel(**user.dict())
+        return user
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail='Incorrect username or password',
@@ -149,6 +153,7 @@ def verify_password(plain_password: Text, hashed_password: Text) -> bool:
     bool
         if passwords match
     """
+    print(hashed_password)
     return pwd_context.verify(plain_password, hashed_password)
 
 
