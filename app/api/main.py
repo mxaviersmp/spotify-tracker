@@ -7,7 +7,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.templating import Jinja2Templates
 from starlette.responses import HTMLResponse
 
+from app import __version__
 from app.api.crud.user import create_user
+from app.api.dependencies.config import SETTINGS
 from app.api.dependencies.security import (
     authenticate_user,
     authorize_spotify,
@@ -19,18 +21,21 @@ from app.api.routers import items, user
 from app.database.schema import db
 from app.etl.spotify_api import get_refresh_token, get_user_me
 
-app = FastAPI(title='Spotify Tracker', version='1.0.0')
+app_version = __version__
+app = FastAPI(
+    title='Spotify Tracker',
+    version=app_version,
+    root_path=f'/{SETTINGS.app_env}'
+)
 app.include_router(user.router)
 app.include_router(items.router)
-origins = [
-    'http://localhost',
-]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=['*'],
     allow_credentials=True,
-    allow_methods=['*'],
-    allow_headers=['*'],
+    allow_methods=['GET', 'POST', 'OPTIONS'],
+    allow_headers=['x-apigateway-header', 'Content-Type', 'X-Amz-Date'],
 )
 app.state.database = db
 templates = Jinja2Templates(directory=Path(__file__).resolve().parent / 'templates')
@@ -55,7 +60,7 @@ async def shutdown():
 @app.get('/')
 async def root():
     """Return status."""
-    return {'status': 'ok'}
+    return {'status': 'ok', 'version': app_version}
 
 
 @app.get(

@@ -8,3 +8,4 @@ flake8-docstrings
 pytest
 ipykernel
 psycopg2
+streamlit

@@ -1,17 +1,22 @@
 {
-    "python.pythonPath": "/usr/local/bin/python",
+    "python.pythonPath": "venv/bin/python",
     "python.linting.flake8Enabled": true,
     "python.linting.enabled": true,
     "cSpell.words": [
+        "DBAPI",
         "asyncio",
         "asyncpg",
         "bcrypt",
         "dateutil",
         "deque",
+        "dotenv",
         "expanduser",
         "getenv",
         "getsizeof",
         "itertools",
+        "loglevel",
+        "myapp",
+        "mymodel",
         "noqa",
         "ormar",
         "pathlib",
@@ -20,6 +25,7 @@
         "speechiness",
         "spotify",
         "sqlite",
+        "starlette",
         "uvicorn"
     ]
 }
