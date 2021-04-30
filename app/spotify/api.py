@@ -58,7 +58,6 @@ async def get_access_token(refresh_token: Text) -> Text:
     str
         spotify user access token
     """
-    oauth_token_url = 'https://accounts.spotify.com/api/token'
     payload = {
         'grant_type': 'refresh_token',
         'refresh_token': refresh_token
@@ -68,7 +67,7 @@ async def get_access_token(refresh_token: Text) -> Text:
     }
     response = await async_request(
         'post',
-        oauth_token_url,
+        OAUTH_TOKEN_URL,
         data=payload,
         headers=headers,
     )

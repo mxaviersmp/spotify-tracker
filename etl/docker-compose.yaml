@@ -61,6 +61,12 @@
         APP_DB_PORT: "${APP_DB_PORT}"
         APP_DB_DATABASE: "${APP_DB_DATABASE}"
         AIRFLOW_EMAIL: "${AIRFLOW_EMAIL}"
+        CLIENT_ID: "${CLIENT_ID}"
+        CLIENT_SECRET: "${CLIENT_SECRET}"
+        OAUTH_AUTHORIZE_URL: "${OAUTH_AUTHORIZE_URL}"
+        OAUTH_TOKEN_URL: "${OAUTH_TOKEN_URL}"
+        REDIRECT_URI: "${REDIRECT_URI}"
+        SCOPE: "${SCOPE}"
       volumes:
         - ./dags:/opt/airflow/dags
         - ./logs:/opt/airflow/logs
