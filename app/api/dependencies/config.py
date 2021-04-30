@@ -7,16 +7,16 @@ class Settings(BaseSettings):
     """Application settings."""
 
     app_env: Optional[str] = ''
-    client_id: str
-    client_secret: str
-    oauth_authorize_url: str
-    oauth_token_url: str
-    redirect_uri: str
-    scope: str
-    b64_client: str
-    secret_key: str
-    algorithm: str
-    access_token_expire_minutes: int
+    client_id: Optional[str] = ''
+    client_secret: Optional[str] = ''
+    oauth_authorize_url: Optional[str] = ''
+    oauth_token_url: Optional[str] = ''
+    redirect_uri: Optional[str] = ''
+    scope: Optional[str] = ''
+    b64_client: Optional[str] = ''
+    secret_key: Optional[str] = ''
+    algorithm: Optional[str] = ''
+    access_token_expire_minutes: Optional[int] = 0
 
 
 SETTINGS = Settings()
@@ -28,7 +28,7 @@ AUDIO_FEATURES = [
     'loudness',
     'speechiness',
     'acousticness',
-    'instrumentalness',
+    'inOptional[str] = ''umentalness',
     'liveness',
     'valence',
     'tempo',

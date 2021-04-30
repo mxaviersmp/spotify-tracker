@@ -1,0 +1,54 @@
+name: Deploy main branch
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+        python-version: [3.8]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install package
+      run: |
+        pip install virtualenv
+        virtualenv venv
+        source venv/bin/activate
+        pip install -e .
+    - name: Serverless Deploy
+      uses: dhollerbach/github-action-serverless-with-python-requirements@master
+      with:
+        args: '--stage dev --region us-east-1'
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        ALGORITHM: ${{ secrets.ALGORITHM }}
+        ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
+        CLIENT_ID: ${{ secrets.CLIENT_ID }}
+        CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+        OAUTH_AUTHORIZE_URL: ${{ secrets.OAUTH_AUTHORIZE_URL }}
+        OAUTH_TOKEN_URL: ${{ secrets.OAUTH_TOKEN_URL }}
+        REDIRECT_URI: ${{ secrets.REDIRECT_URI }}
+        SCOPE: ${{ secrets.SCOPE }}
+        B64_CLIENT: ${{ secrets.B64_CLIENT }}
+        APP_DB_CONNECTOR: ${{ secrets.APP_DB_CONNECTOR }}
+        APP_DB_USERNAME: ${{ secrets.APP_DB_USERNAME }}
+        APP_DB_PASSWORD: ${{ secrets.APP_DB_PASSWORD }}
+        APP_DB_HOST: ${{ secrets.APP_DB_HOST }}
+        APP_DB_PORT: ${{ secrets.APP_DB_PORT }}
+        APP_DB_DATABASE: ${{ secrets.APP_DB_DATABASE }}
