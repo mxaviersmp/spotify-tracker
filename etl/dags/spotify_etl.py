@@ -6,7 +6,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
 
-from app.etl.tasks import (
+from app.spotify.tasks import (
     get_artist_info,
     get_played_tracks,
     get_track_info,
@@ -37,7 +37,7 @@ def run_get_artist_info():
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
-    'email': [os.getenv('EMAIL')],
+    'email': [os.getenv('AIRFLOW_EMAIL')],
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 1,

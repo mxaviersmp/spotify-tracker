@@ -1,9 +1,12 @@
+from typing import Optional
+
 from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
     """Application settings."""
 
+    app_env: Optional[str] = ''
     client_id: str
     client_secret: str
     oauth_authorize_url: str

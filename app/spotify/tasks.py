@@ -11,7 +11,7 @@ from app.database.schema import (
     UserToken,
     db,
 )
-from app.etl.spotify_api import (
+from app.spotify.api import (
     get_access_token,
     get_artists,
     get_audio_features,

@@ -30,3 +30,19 @@ for dir in dags_dirs:
 
 ![db erd diagram](./spotify-stats-erd.png)
 ![etl diagram](./spotify-stats-etl.png)
+
+- `$ npm install -g serverless`
+- `$ npm install`
+- Configure aws credentials for serverless
+- `$ sls deploy --region "us-east-1" --stage "dev"`
+- `$ sls invoke -f app --path notebooks/data.json --log`
+- `$ sls remove --region "us-east-1" --stage "dev"`
+
+- `$ alembic revision --autogenerate`
+- `$ bash pre_start.sh`
+
+- `$ mkdir ./logs ./plugins`
+- `$ echo -e "AIRFLOW_UID=$(id -u)\nAIRFLOW_GID=0" >> .env`
+- `$ docker-compose up airflow-init`
+- `$ docker-compose up -d`
+- `$ docker-compose down --volumes all`

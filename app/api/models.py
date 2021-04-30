@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Text
 
 from pydantic import BaseModel
 from pydantic.class_validators import validator
@@ -46,24 +46,27 @@ class UserModel(BaseModel):
     ----------
         id: str
             user unique identifier
-        display_type: str
+        display_type: str, optional
             user nickname
         email: str
             user email
-        country: str
+        country: str, optional
             user country location initials
-        uri: str
+        uri: str, optional
             user spotify uri
-        href: str
+        href: str, optional
             user http url
+        scopes: list of str
+            user scopes
     """
 
     id: str
-    display_name: str
+    display_name: Optional[str]
     email: str
-    country: str
-    uri: str
-    href: str
+    country: Optional[str]
+    uri: Optional[str]
+    href: Optional[str]
+    scopes: Text
 
 
 class UserRefreshToken(UserModel):
@@ -90,19 +93,6 @@ class UserPassword(UserRefreshToken):
     """
 
     password: str
-
-
-class UserInDB(UserRefreshToken):
-    """
-    UserInDB model.
-
-    Attributes
-    ----------
-        hashed_password: str
-            user hashed password
-    """
-
-    hashed_password: str
 
 
 class TrackModel(BaseModel):

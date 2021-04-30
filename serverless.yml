@@ -1,0 +1,81 @@
+service: spotify-tracker
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  lambdaHashingVersion: 20201221
+  runtime: python3.8
+  region: ${opt:region, 'us-east-1'}
+  stage: ${opt:stage, 'dev'}
+  profile: ${opt:aws-profile , 'default'}
+  environment:
+    REGION: ${self:provider.region}
+    LOG_LEVEL: ${opt:loglevel, 'INFO'}
+
+custom:
+  securityGroup:
+    db: ${env:DB_SECURITY_GROUP, 'default'}
+  pythonRequirements:
+    layer: true
+
+functions:
+  app:
+    handler: app.handler
+    layers:
+      - Ref: PythonRequirementsLambdaLayer
+    events:
+      - http:
+          method: ANY
+          path: /
+      - http:
+          method: ANY
+          path: /{proxy+}
+    vpc:
+      securityGroupIds:
+        - ${self:custom.securityGroup.db}
+      subnetIds: []
+    environment:
+      APP_ENV: ${opt:stage, 'dev'}
+      APP_LAMBDA: true
+      SECRET_KEY: ${env:SECRET_KEY}
+      ALGORITHM: ${env:ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${env:ACCESS_TOKEN_EXPIRE_MINUTES}
+      CLIENT_ID: ${env:CLIENT_ID}
+      CLIENT_SECRET: ${env:CLIENT_SECRET}
+      OAUTH_AUTHORIZE_URL: ${env:OAUTH_AUTHORIZE_URL}
+      OAUTH_TOKEN_URL: ${env:OAUTH_TOKEN_URL}
+      REDIRECT_URI: ${env:REDIRECT_URI}
+      SCOPE: ${env:SCOPE}
+      B64_CLIENT: ${env:B64_CLIENT}
+      APP_DB_CONNECTOR: ${env:APP_DB_CONNECTOR}
+      APP_DB_USERNAME: ${env:APP_DB_USERNAME}
+      APP_DB_PASSWORD: ${env:APP_DB_PASSWORD}
+      APP_DB_HOST: ${env:APP_DB_HOST}
+      APP_DB_PORT: ${env:APP_DB_PORT}
+      APP_DB_DATABASE: ${env:APP_DB_DATABASE}
+      EMAIL: ${env:EMAIL}
+
+plugins:
+  - serverless-python-requirements
+  - serverless-dotenv-plugin
+
+package:
+  exclude:
+    - node_modules/**
+    - venv/**
+    - .vscode/**
+    - .devcontainer/**
+    - notebooks/**
+    - .env*
+    - Dockerfile
+    - Makefile
+    - package-lock.json
+    - .pre-commit-config.yaml
+    - .gitignore
+    - .coverage
+    - .pytest_cache/**
+    - requirements-dev.txt
+    - setup.cfg
+    - '*.png'
+    - '*.egg-info'

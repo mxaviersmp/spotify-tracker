@@ -1,9 +1,10 @@
 import asyncio
 import json
+from pathlib import Path
 
 from rich import print
 
-from app.database.schema import (  # TrackArtist,
+from app.database.schema import (
     Artist,
     Genre,
     PlayedTrack,
@@ -17,7 +18,7 @@ from app.database.schema import (  # TrackArtist,
 
 async def add_users():
     async with db:
-        with open('users.json~') as f:
+        with open(Path(__file__).resolve().parent / 'users.json~') as f:
             users = json.load(f)
         await User.objects.bulk_create(
             [User(**u) for u in users]
@@ -30,10 +31,8 @@ async def add_users():
 
 async def main():
     async with db:
-        query = {'id': 'flycher'}
-        resp = await User.objects.get(**query)
-        resp.scopes = 'admin user items'
-        await resp.update()
+        # query = {'email': 'matheus.sampaio011@gmail.com'}
+        resp = await User.objects.all()
         print(resp)
     return
 
