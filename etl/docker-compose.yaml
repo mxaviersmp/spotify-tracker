@@ -67,6 +67,7 @@
         OAUTH_TOKEN_URL: "${OAUTH_TOKEN_URL}"
         REDIRECT_URI: "${REDIRECT_URI}"
         SCOPE: "${SCOPE}"
+        B64_CLIENT: "${B64_CLIENT}"
       volumes:
         - ./dags:/opt/airflow/dags
         - ./logs:/opt/airflow/logs
