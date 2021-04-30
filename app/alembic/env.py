@@ -1,11 +1,11 @@
 from __future__ import with_statement
 
-import os
 from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+from app.database.db import DB_URL
 from app.database.schema import metadata
 
 # from app.database.schema import (
@@ -37,17 +37,6 @@ target_metadata = metadata
 # ... etc.
 
 
-def get_url():
-    """Creates db url."""
-    connector = os.getenv('DB_CONNECTOR', 'postgres')
-    user = os.getenv('DB_USERNAME', 'postgres')
-    password = os.getenv('DB_PASSWORD', '')
-    server = os.getenv('DB_HOST', 'db')
-    port = os.getenv('DB_PORT', 5432)
-    db = os.getenv('DB_DATABASE', 'app')
-    return f'{connector}://{user}:{password}@{server}:{port}/{db}'
-
-
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
 
@@ -60,9 +49,8 @@ def run_migrations_offline():
     script output.
 
     """
-    url = get_url()
     context.configure(
-        url=url,
+        url=DB_URL,
         target_metadata=target_metadata,
         dialect_opts={'paramstyle': 'named'},
         literal_binds=True,
@@ -81,7 +69,7 @@ def run_migrations_online():
 
     """
     configuration = config.get_section(config.config_ini_section)
-    configuration['sqlalchemy.url'] = get_url()
+    configuration['sqlalchemy.url'] = DB_URL
     connectable = engine_from_config(
         configuration, prefix='sqlalchemy.', poolclass=pool.NullPool,
     )

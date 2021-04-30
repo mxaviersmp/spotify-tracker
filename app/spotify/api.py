@@ -34,7 +34,7 @@ async def get_refresh_token(code: Text) -> Dict[str, str]:
         'Authorization': f'Basic {B64_CLIENT}'
     }
     response = await async_request(
-        'get',
+        'post',
         OAUTH_TOKEN_URL,
         data=payload,
         headers=headers,

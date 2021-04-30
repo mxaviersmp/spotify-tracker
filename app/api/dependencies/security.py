@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Dict, List, Mapping, Optional, Text
 
-import requests
 from fastapi import Depends, status
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
@@ -13,6 +12,7 @@ from app.api.crud.user import get_user
 from app.api.dependencies.config import SETTINGS
 from app.api.models import TokenData, UserModel
 from app.database.schema import User
+from app.utils.misc import async_request
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl='token',
@@ -25,7 +25,7 @@ oauth2_scheme = OAuth2PasswordBearer(
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 
-def authorize_spotify() -> Dict:
+async def authorize_spotify() -> Dict:
     """
     Generates url for spotify authorization.
 
@@ -34,7 +34,8 @@ def authorize_spotify() -> Dict:
     dict
         spotify authorization url
     """
-    response = requests.get(
+    response = await async_request(
+        'get',
         SETTINGS.oauth_authorize_url,
         params={
             'client_id' : SETTINGS.client_id,

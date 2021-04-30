@@ -23,10 +23,11 @@ from app.database.schema import db
 from app.spotify.api import get_refresh_token, get_user_me
 
 app_version = __version__
+root_path = f'/{SETTINGS.app_env}'
 app = FastAPI(
     title='Spotify Tracker',
     version=app_version,
-    root_path=f'/{SETTINGS.app_env}'
+    root_path=root_path
 )
 app.include_router(user.router)
 app.include_router(items.router)
@@ -72,24 +73,23 @@ async def root():
 )
 async def authorize():
     """Redirects to spotify authorization."""
-    url = authorize_spotify()
+    url = await authorize_spotify()
     return RedirectResponse(url.get('spotify'))
 
 
 @app.get('/callback', response_class=HTMLResponse)
-async def callback(request: Request = None):
+async def callback(code: str, request: Request = None):
     """Callback from spotify authorization. Gets user refresh token and info."""
-    code = request.query_params.get('code')
-    tokens = get_refresh_token(code)
-
+    # code = request.query_params.get('code')
+    tokens = await get_refresh_token(code)
     access_token = tokens.get('access_token')
     refresh_token = tokens.get('refresh_token')
-    user = get_user_me(access_token)
+    user = await get_user_me(access_token)
     user['refresh_token'] = refresh_token
 
     return templates.TemplateResponse(
         'register.html',
-        context={**user, 'request': request}
+        context={**user, 'request': request, 'action': f'{root_path}/register'}
     )
 
 
