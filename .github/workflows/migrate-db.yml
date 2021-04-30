@@ -19,7 +19,6 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Alembic migration
       run:
-        # apt install libpq-dev
         pip install .
         cd app
         bash migrate.sh
