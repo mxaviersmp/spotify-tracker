@@ -1,4 +1,4 @@
-name: Migrate db main branch
+name: Migrate database main branch
 
 on:
   push:
@@ -23,3 +23,13 @@ jobs:
         pip install .
         cd app
         bash migrate.sh
+      env:
+        APP_DB_CONNECTOR: ${{ secrets.APP_DB_CONNECTOR }}
+        APP_DB_USERNAME: ${{ secrets.APP_DB_USERNAME }}
+        APP_DB_PASSWORD: ${{ secrets.APP_DB_PASSWORD }}
+        APP_DB_HOST: ${{ secrets.APP_DB_HOST }}
+        APP_DB_PORT: ${{ secrets.APP_DB_PORT }}
+        APP_DB_DATABASE: ${{ secrets.APP_DB_DATABASE }}
+        FIRST_ADMIN_ID: ${{ secrets.FIRST_ADMIN_ID }}
+        FIRST_ADMIN_EMAIL: ${{ secrets.FIRST_ADMIN_EMAIL }}
+        FIRST_ADMIN_PASSWORD: ${{ secrets.FIRST_ADMIN_PASSWORD }}
