@@ -84,6 +84,13 @@ async def save_new_artists(all_tracks):
         new_artists = [*filter(
             lambda x: x.get('id') not in existing_artists, new_artists
         )]
+        a_ids = []
+        new_artists = [
+            (a, a_ids.append(a['id']))
+            for a in new_artists if a['id'] not in a_ids
+        ]
+        new_artists = [*map(lambda x: x[0], new_artists)]
+
         await Artist.objects.bulk_create([
             Artist(**artist) for artist in new_artists
         ])
@@ -115,6 +122,13 @@ async def save_new_tracks(all_tracks):
             new_tracks,
             ['id', 'name', 'href', 'uri', 'popularity']
         )
+        t_ids = []
+        new_tracks = [
+            (t, t_ids.append(t['id']))
+            for t in new_tracks if t['id'] not in t_ids
+        ]
+        new_tracks = [*map(lambda x: x[0], new_tracks)]
+
         await Track.objects.bulk_create([
             Track(**track) for track in new_tracks
         ])
