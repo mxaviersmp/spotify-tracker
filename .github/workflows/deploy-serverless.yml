@@ -1,9 +1,9 @@
 name: Deploy main branch
 
 on:
-  push:
-    branches:
-      - actions
+  release:
+    types:
+      - published
 
 jobs:
   deploy:

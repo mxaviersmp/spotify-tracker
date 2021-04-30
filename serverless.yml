@@ -51,7 +51,6 @@ functions:
 
 plugins:
   - serverless-python-requirements
-  # - serverless-dotenv-plugin
 
 package:
   exclude:
@@ -71,4 +70,3 @@ package:
     - requirements-dev.txt
     - setup.cfg
     - '*.png'
-    # - '*.egg-info'

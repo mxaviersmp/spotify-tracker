@@ -1,9 +1,9 @@
 name: Migrate database main branch
 
 on:
-  push:
-    branches:
-      - main
+  release:
+    types:
+      - published
 
 jobs:
   deploy:
