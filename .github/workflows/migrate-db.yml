@@ -3,7 +3,7 @@ name: Migrate database main branch
 on:
   push:
     branches:
-      - actions
+      - main
 
 jobs:
   deploy:
