@@ -40,3 +40,9 @@ for dir in dags_dirs:
 
 - `$ alembic revision --autogenerate`
 - `$ bash pre_start.sh`
+
+- `$ mkdir ./logs ./plugins`
+- `$ echo -e "AIRFLOW_UID=$(id -u)\nAIRFLOW_GID=0" >> .env`
+- `$ docker-compose up airflow-init`
+- `$ docker-compose up -d`
+- `$ docker-compose down --volumes all`

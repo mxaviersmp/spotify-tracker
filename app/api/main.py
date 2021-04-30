@@ -20,7 +20,7 @@ from app.api.dependencies.security import (
 from app.api.models import Token
 from app.api.routers import admin, items, user
 from app.database.schema import db
-from app.etl.spotify_api import get_refresh_token, get_user_me
+from app.spotify.api import get_refresh_token, get_user_me
 
 app_version = __version__
 app = FastAPI(

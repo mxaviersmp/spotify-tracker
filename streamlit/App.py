@@ -1,8 +1,9 @@
 import altair as alt
 import pandas as pd
 import requests
-import streamlit as st
 from SessionState import get
+
+import streamlit as st
 
 session_state = get(token='')
 

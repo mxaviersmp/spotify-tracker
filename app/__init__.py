@@ -4,7 +4,7 @@ from importlib.metadata import version
 
 from semantic_version import Version
 
-from . import api, database, etl, utils
+from . import api, database, spotify, utils
 
 __version__ = str(Version.coerce(version(__package__)))
 match = re.match(r'.+\-(\D+)(\d+)', __version__)
