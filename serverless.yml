@@ -71,4 +71,4 @@ package:
     - requirements-dev.txt
     - setup.cfg
     - '*.png'
-    - '*.egg-info'
+    # - '*.egg-info'
