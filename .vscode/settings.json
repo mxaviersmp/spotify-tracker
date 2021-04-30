@@ -1,5 +1,5 @@
 {
-    "python.pythonPath": "/usr/local/bin/python",
+    "python.pythonPath": "venv/bin/python",
     "python.linting.flake8Enabled": true,
     "python.linting.enabled": true,
     "cSpell.words": [
@@ -13,6 +13,7 @@
         "expanduser",
         "getenv",
         "getsizeof",
+        "httpx",
         "itertools",
         "loglevel",
         "myapp",

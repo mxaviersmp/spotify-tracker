@@ -29,7 +29,7 @@ async def update_access_tokens():
     async with db:
         tokens = await UserToken.objects.select_related('user').all()
         for token in tokens:
-            token.access_token = get_access_token(
+            token.access_token = await get_access_token(
                 token.user.refresh_token
             )
         await UserToken.objects.bulk_update(tokens)
@@ -50,7 +50,7 @@ async def get_played_tracks():
         yesterday_unix_timestamp = int(yesterday.timestamp()) * 1000
         all_tracks = []
         for token in tokens:
-            user_tracks = get_recently_played(
+            user_tracks = await get_recently_played(
                 token.access_token, after_timestamp=yesterday_unix_timestamp
             )
             for track in user_tracks:
@@ -161,7 +161,7 @@ async def get_track_info():
         access_tokens = await UserToken.objects.all()
         access_tokens = [token.access_token for token in access_tokens]
 
-        audio_features = get_audio_features(access_tokens, new_tracks_id)
+        audio_features = await get_audio_features(access_tokens, new_tracks_id)
         columns = [
             'danceability',
             'energy',
@@ -206,7 +206,7 @@ async def get_artist_info():
         access_tokens = await UserToken.objects.all()
         access_tokens = [token.access_token for token in access_tokens]
 
-        artists_info = get_artists(access_tokens, new_artists_id)
+        artists_info = await get_artists(access_tokens, new_artists_id)
         artists_info = select_dict_keys(artists_info, ['id', 'popularity', 'genres'])
         genres = []
         for artist in artists_info:

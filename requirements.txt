@@ -1,6 +1,7 @@
 aiofiles
 alembic
 fastapi
+httpx
 jinja2
 loguru
 mangum

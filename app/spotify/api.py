@@ -2,17 +2,16 @@ import os
 import random
 from typing import Dict, List, Optional, Text
 
-import requests
-
 from app.utils.data import select_dict_keys
 from app.utils.logger import logger
+from app.utils.misc import async_request
 
 B64_CLIENT = os.getenv('B64_CLIENT')
 REDIRECT_URI = os.getenv('REDIRECT_URI')
 OAUTH_TOKEN_URL = os.getenv('OAUTH_TOKEN_URL')
 
 
-def get_refresh_token(code: Text) -> Dict[str, str]:
+async def get_refresh_token(code: Text) -> Dict[str, str]:
     """
     Gets a new refresh token.
 
@@ -34,7 +33,8 @@ def get_refresh_token(code: Text) -> Dict[str, str]:
     headers = {
         'Authorization': f'Basic {B64_CLIENT}'
     }
-    response = requests.post(
+    response = await async_request(
+        'get',
         OAUTH_TOKEN_URL,
         data=payload,
         headers=headers,
@@ -44,7 +44,7 @@ def get_refresh_token(code: Text) -> Dict[str, str]:
     return tokens
 
 
-def get_access_token(refresh_token: Text) -> Text:
+async def get_access_token(refresh_token: Text) -> Text:
     """
     Gets a new access token using the refresh token.
 
@@ -66,7 +66,8 @@ def get_access_token(refresh_token: Text) -> Text:
     headers = {
         'Authorization': f'Basic {B64_CLIENT}'
     }
-    response = requests.post(
+    response = await async_request(
+        'post',
         oauth_token_url,
         data=payload,
         headers=headers,
@@ -75,7 +76,7 @@ def get_access_token(refresh_token: Text) -> Text:
     return token.get('access_token')
 
 
-def get_user_me(access_token: Text) -> Dict:
+async def get_user_me(access_token: Text) -> Dict:
     """
     Gets the user information.
 
@@ -89,7 +90,8 @@ def get_user_me(access_token: Text) -> Dict:
     dict
         user information
     """
-    response = requests.get(
+    response = await async_request(
+        'get',
         'https://api.spotify.com/v1/me',
         headers={'Authorization': f'Bearer {access_token}'}
     )
@@ -97,7 +99,7 @@ def get_user_me(access_token: Text) -> Dict:
     return user
 
 
-def get_recently_played(
+async def get_recently_played(
     access_token: Text, after_timestamp: Text, limit: Optional[int] = 50
 ) -> List[Dict]:
     """
@@ -125,7 +127,8 @@ def get_recently_played(
         limit, after_timestamp
     )
     while url:
-        response = requests.get(
+        response = await async_request(
+            'get',
             url,
             headers={'Authorization': f'Bearer {access_token}'}
         )
@@ -136,7 +139,7 @@ def get_recently_played(
     return tracks
 
 
-def get_audio_features(
+async def get_audio_features(
     access_tokens: Text, track_ids: List[Text], limit: Optional[int] = 100
 ) -> List[Dict]:
     """
@@ -165,7 +168,8 @@ def get_audio_features(
     for i in range(0, size, limit):
         current_tracks = ','.join(track_ids[i: i + limit])
         access_token = random.choice(access_tokens)
-        response = requests.get(
+        response = await async_request(
+            'get',
             url.format(current_tracks),
             headers={'Authorization': f'Bearer {access_token}'}
         )
@@ -177,7 +181,7 @@ def get_audio_features(
     return tracks
 
 
-def get_artists(
+async def get_artists(
     access_tokens: Text, artist_ids: List[Text], limit: Optional[int] = 100
 ):
     """
@@ -206,7 +210,8 @@ def get_artists(
     for i in range(0, size, limit):
         current_artists = ','.join(artist_ids[i: i + limit])
         access_token = random.choice(access_tokens)
-        response = requests.get(
+        response = await async_request(
+            'get',
             url.format(current_artists),
             headers={'Authorization': f'Bearer {access_token}'}
         )
