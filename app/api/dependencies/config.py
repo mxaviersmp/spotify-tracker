@@ -28,7 +28,7 @@ AUDIO_FEATURES = [
     'loudness',
     'speechiness',
     'acousticness',
-    'inOptional[str] = ''umentalness',
+    'instrumentalness',
     'liveness',
     'valence',
     'tempo',
