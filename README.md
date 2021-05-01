@@ -106,3 +106,4 @@ The serverless api deploy is done with the serverless framework.
 ### Github Actions
 
 The Github Actions are responsible to update the deploy and execute db migration automatically on new releases.
+Add all the FastAPI and DB environment variables to Github Secrets.
