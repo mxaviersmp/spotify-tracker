@@ -8,7 +8,8 @@ setup(
     version='0.1.1',
     python_requires='>=3.8',
     author='Matheus Xavier',
-    description='Utility functions',
+    author_email='matheus.sampaio011@gmail.com',
+    description='Packaging of spotify tracker api',
     packages=find_packages(),
     install_requires=DEPENDENCIES
 )
