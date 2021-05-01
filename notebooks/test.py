@@ -1,14 +1,16 @@
 import asyncio
 
+from rich import print
+
+from app.api.crud.played_tracks import get_artists
 from app.database.db import db
-from app.database.schema import Artist
 
 
 async def main():
     async with db:
         # query = {'email': 'matheus.sampaio011@gmail.com'}
-        resp = await Artist.objects.select_.all()
-        print([r.dict().get('trackartists') for r in resp])
+        resp = await get_artists()
+        print(resp)
     # return
 
 asyncio.run(main())

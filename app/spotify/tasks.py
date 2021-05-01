@@ -17,7 +17,11 @@ from app.spotify.api import (
     get_audio_features,
     get_recently_played,
 )
-from app.utils.data import rename_dict_keys, select_dict_keys
+from app.utils.data import (
+    filter_duplicate_dicts_by_key,
+    rename_dict_keys,
+    select_dict_keys,
+)
 
 
 async def update_access_tokens():
@@ -84,12 +88,7 @@ async def save_new_artists(all_tracks):
         new_artists = [*filter(
             lambda x: x.get('id') not in existing_artists, new_artists
         )]
-        a_ids = []
-        new_artists = [
-            (a, a_ids.append(a['id']))
-            for a in new_artists if a['id'] not in a_ids
-        ]
-        new_artists = [*map(lambda x: x[0], new_artists)]
+        new_artists = filter_duplicate_dicts_by_key(new_artists, 'id')
 
         await Artist.objects.bulk_create([
             Artist(**artist) for artist in new_artists
@@ -122,12 +121,7 @@ async def save_new_tracks(all_tracks):
             new_tracks,
             ['id', 'name', 'href', 'uri', 'popularity']
         )
-        t_ids = []
-        new_tracks = [
-            (t, t_ids.append(t['id']))
-            for t in new_tracks if t['id'] not in t_ids
-        ]
-        new_tracks = [*map(lambda x: x[0], new_tracks)]
+        new_tracks = filter_duplicate_dicts_by_key(new_tracks, 'id')
 
         await Track.objects.bulk_create([
             Track(**track) for track in new_tracks

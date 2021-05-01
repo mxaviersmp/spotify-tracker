@@ -26,6 +26,7 @@
         "pathlib",
         "postgresql",
         "psutil",
+        "pycache",
         "pydantic",
         "resourses",
         "speechiness",

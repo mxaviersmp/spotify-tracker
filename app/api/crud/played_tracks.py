@@ -2,6 +2,7 @@ from collections import Counter, defaultdict
 from typing import DefaultDict, Dict, List, Optional
 
 from app.database.schema import PlayedTrack, Track, TrackArtist
+from app.utils.data import filter_duplicate_dicts_by_key
 
 
 async def get_played_tracks(query: Dict) -> List[Dict]:
@@ -24,7 +25,10 @@ async def get_tracks(query: Optional[Dict] = None) -> List[Dict]:
         for ta in t.trackartists:
             await ta.artist.load()
     count_tracks = Counter([pt.track.id for pt in played_tracks])
-    return [{**t.dict(), 'count': count_tracks[t.id]} for t in tracks]
+
+    tracks = [t.dict() for t in tracks]
+    tracks = filter_duplicate_dicts_by_key(tracks, 'id')
+    return [{**t, 'count': count_tracks[t['id']]} for t in tracks]
 
 
 async def get_artists(query: Optional[Dict] = None) -> List[Dict]:
@@ -41,7 +45,10 @@ async def get_artists(query: Optional[Dict] = None) -> List[Dict]:
     count_artists = Counter(
         [ta.artist.id for pt in played_tracks for ta in pt.track.trackartists]
     )
-    return [{**a.dict(), 'count': count_artists[a.id]} for a in artists]
+
+    artists = [a.dict() for a in artists]
+    artists = filter_duplicate_dicts_by_key(artists, 'id')
+    return [{**a, 'count': count_artists[a['id']]} for a in artists]
 
 
 async def get_audio_features(

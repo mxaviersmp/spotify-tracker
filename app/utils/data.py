@@ -1,4 +1,4 @@
-from typing import Dict, List, Text, Union
+from typing import Any, Dict, List, Text, Union
 
 
 def select_dict_keys(
@@ -50,3 +50,29 @@ def rename_dict_keys(
         for old, new in keys.items():
             dictionary[new] = dictionary.pop(old)
         return dictionary
+
+
+def filter_duplicate_dicts_by_key(
+    dictionaries: List[Dict], key: Any
+) -> List[Dict]:
+    """
+    Removes duplicate dictionary entries from list.
+
+    Parameters
+    ----------
+    dictionaries : list of dict
+        list of dictionaries
+    key : any hashable item
+        unique key
+
+    Returns
+    -------
+    list of dict
+        list with removed enries
+    """
+    unique_keys = []
+    dictionaries = [
+        (d, unique_keys.append(d[key]))
+        for d in dictionaries if d[key] not in unique_keys
+    ]
+    return [*map(lambda x: x[0], dictionaries)]
