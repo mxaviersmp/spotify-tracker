@@ -118,7 +118,7 @@ class TrackModel(BaseModel):
     name: str
     href: str
     uri: str
-    popularity: str
+    popularity: int
     trackartists: Optional[List[str]]
     count: Optional[int]
 
