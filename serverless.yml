@@ -1,6 +1,7 @@
 service: spotify-tracker
 
 frameworkVersion: '2'
+useDotenv: true
 
 provider:
   name: aws
@@ -53,20 +54,13 @@ plugins:
   - serverless-python-requirements
 
 package:
-  exclude:
-    - node_modules/**
-    - venv/**
-    - .vscode/**
-    - .devcontainer/**
-    - notebooks/**
-    - .env*
-    - Dockerfile
-    - Makefile
-    - package-lock.json
-    - .pre-commit-config.yaml
-    - .gitignore
-    - .coverage
-    - .pytest_cache/**
-    - requirements-dev.txt
-    - setup.cfg
-    - '*.png'
+  patterns:
+    - '!*'
+    - '!**'
+    - 'app/**'
+    - 'app.egg-info/**'
+    - 'LICENCE.txt'
+    - 'README.md'
+    - 'requirements.txt'
+    - 'setup.py'
+    - '!**/__pycache__/**'
