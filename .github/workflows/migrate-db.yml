@@ -1,6 +1,9 @@
 name: Migrate database main branch
 
 on:
+  push:
+    branches:
+      - readme
   release:
     types:
       - published

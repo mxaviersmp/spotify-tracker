@@ -1,6 +1,9 @@
 name: Deploy main branch
 
 on:
+  push:
+    branches:
+      - readme
   release:
     types:
       - published
