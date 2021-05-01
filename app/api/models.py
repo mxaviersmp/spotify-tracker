@@ -3,7 +3,6 @@ from typing import List, Optional, Text
 
 from pydantic import BaseModel
 from pydantic.class_validators import validator
-from pydantic.fields import Field
 
 
 class Token(BaseModel):
@@ -120,10 +119,10 @@ class TrackModel(BaseModel):
     href: str
     uri: str
     popularity: str
-    artists: Optional[List[str]] = Field(alias='trackartists')
+    trackartists: Optional[List[str]]
     count: Optional[int]
 
-    @validator('artists', pre=True, each_item=True)
+    @validator('trackartists', pre=True, each_item=True)
     def extract_artists_names(cls, value):  # noqa:N805
         """Extracts names of the artists from Artist."""
         return value.get('artist').get('name')
@@ -154,14 +153,8 @@ class ArtistModel(BaseModel):
     href: str
     uri: str
     popularity: int
-    tracks: Optional[List[str]] = Field(alias='trackartists')
     genres: Optional[List[str]]
     count: Optional[int]
-
-    @validator('tracks', pre=True, each_item=True)
-    def extract_tracks_names(cls, value):  # noqa:N805
-        """Extracts names of the tracks from Track."""
-        return value.get('track').get('name')
 
     @validator('genres', pre=True, each_item=True)
     def extract_genres_names(cls, value):  # noqa:N805
