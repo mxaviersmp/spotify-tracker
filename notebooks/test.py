@@ -1,17 +1,14 @@
 import asyncio
 
 from app.database.db import db
-from app.database.schema import Track
+from app.database.schema import Artist
 
 
 async def main():
     async with db:
         # query = {'email': 'matheus.sampaio011@gmail.com'}
-        resp = await Track.objects.all()
-        print(resp)
+        resp = await Artist.objects.select_.all()
+        print([r.dict().get('trackartists') for r in resp])
     # return
-    # print(await update_access_tokens())
-    # print(await get_played_tracks())
-
 
 asyncio.run(main())

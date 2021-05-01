@@ -154,7 +154,6 @@ def verify_password(plain_password: Text, hashed_password: Text) -> bool:
     bool
         if passwords match
     """
-    print(hashed_password)
     return pwd_context.verify(plain_password, hashed_password)
 
 
