@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 
-@router.get('/get-users', response_model=List[UserModel])
+@router.get('/users', response_model=List[UserModel])
 async def get_users(
     current_user: UserModel = Security(get_current_user, scopes=['admin'])  # noqa:B008
 ):
@@ -20,7 +20,7 @@ async def get_users(
     return await get_all_users()
 
 
-@router.get('/add-scopes', response_model=UserModel)
+@router.post('/scopes', response_model=UserModel)
 async def add_scopes_to_user(
     user_id: Text,
     scopes: List[str] = Query(  # noqa: B008
@@ -33,7 +33,7 @@ async def add_scopes_to_user(
     return await add_scopes({'id': user_id}, scopes)
 
 
-@router.get('/remove-scopes', response_model=UserModel)
+@router.delete('/scopes', response_model=UserModel)
 async def remove_scopes_to_user(
     user_id: Text,
     scopes: List[str] = Query(  # noqa: B008
